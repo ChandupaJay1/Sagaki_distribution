@@ -138,40 +138,35 @@
                         </div>
                     </div>
 
-                    <!-- Items Table -->
                     <style>
-                        #itemsTable th, #itemsTable td {
-                            padding: 0.25rem !important;
-                            font-size: 0.75rem !important;
-                        }
-                        #itemsTable .form-control-sm, #itemsTable .form-select-sm {
-                            padding: 0.15rem 0.25rem !important;
-                            font-size: 0.75rem !important;
-                            min-height: 24px !important;
-                            border-radius: 0.2rem;
-                        }
-                        #itemsTable .ts-wrapper .ts-control {
-                            padding: 0.15rem 0.25rem !important;
-                            font-size: 0.75rem !important;
-                            min-height: 24px !important;
-                            border-radius: 0.2rem;
+                        #itemsTable th, #itemsTable td { padding: 0.15rem !important; font-size: 0.7rem !important; white-space: nowrap; }
+                        #itemsTable .form-control-sm, #itemsTable .form-select-sm { padding: 0.1rem 0.2rem !important; font-size: 0.7rem !important; min-height: 22px !important; border-radius: 0.15rem; }
+                        #itemsTable .ts-wrapper .ts-control { padding: 0.1rem 0.2rem !important; font-size: 0.7rem !important; min-height: 22px !important; border-radius: 0.15rem; }
+                        #itemsTable { width: 100% !important; table-layout: auto !important; }
+                        /* Ensure critical columns don't vanish */
+                        #itemsTable .location-input { min-width: 90px !important; }
+                        #itemsTable .unit-input { min-width: 60px !important; }
+                        #itemsTable .product-select { min-width: 120px !important; }
+                        /* TomSelect Dropdown Custom Height */
+                        .ts-dropdown .ts-dropdown-content {
+                            max-height: 450px !important;
                         }
                     </style>
-                    <div class="table-responsive mb-3 border rounded" style="overflow-x: hidden;">
-                        <table class="table table-sm table-bordered mb-0 align-middle text-center" id="itemsTable" style="table-layout: auto; width: 100%;">
+                    <div class="table-responsive mb-3 border rounded">
+                        <table class="table table-sm table-bordered mb-0 align-middle text-center" id="itemsTable">
                             <thead class="bg-primary text-white">
                                 <tr>
-                                    <th class="fw-bold py-2 text-uppercase" style="width: 120px;">Item Code</th>
-                                    <th class="fw-bold py-2 text-uppercase" style="width: auto;">Description</th>
-                                    <th class="fw-bold py-2 text-uppercase" style="width: 55px;">OnHand</th>
-                                    <th class="fw-bold py-2 text-uppercase" style="width: 60px;">Qty</th>
-                                    <th class="fw-bold py-2 text-uppercase" style="width: 80px;">Rate(LKR)</th>
-                                    <th class="fw-bold py-2 text-uppercase" style="width: 85px;">Amount</th>
-                                    <th class="fw-bold py-2 text-uppercase" style="width: 55px;">Disc%</th>
-                                    <th class="fw-bold py-2 text-uppercase" style="width: 75px;">Discount</th>
-                                    <th class="fw-bold py-2 text-uppercase" style="width: 85px;">Total</th>
-                                    <th class="fw-bold py-2 text-uppercase" style="width: 80px;">Location</th>
-                                    <th class="fw-bold py-2 text-uppercase" style="width: 50px;">Unit</th>
+                                    <th class="fw-bold py-2 text-uppercase">Item Code</th>
+                                    <th class="fw-bold py-2 text-uppercase">Description</th>
+                                    <th class="fw-bold py-2 text-uppercase">OnHand</th>
+                                    <th class="fw-bold py-2 text-uppercase">Qty</th>
+                                    <th class="fw-bold py-2 text-uppercase">Rate(LKR)</th>
+                                    <th class="fw-bold py-2 text-uppercase">Amount</th>
+                                    <th class="fw-bold py-2 text-uppercase">Disc%</th>
+                                    <th class="fw-bold py-2 text-uppercase">Discount</th>
+                                    <th class="fw-bold py-2 text-uppercase">Total</th>
+                                    <th class="fw-bold py-2 text-uppercase">Location</th>
+                                    <th class="fw-bold py-2 text-uppercase">Unit</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -189,8 +184,8 @@
                                     <td><input type="number" name="items[0][qty]" class="form-control form-control-sm text-center qty-input" step="any"></td>
                                     <td><input type="number" name="items[0][rate]" class="form-control form-control-sm text-end rate-input" step="any"></td>
                                     <td><input type="number" name="items[0][amount]" class="form-control form-control-sm text-end amount-input bg-light" readonly></td>
-                                    <td><input type="number" name="items[0][disc_percent]" class="form-control form-control-sm text-center disc-percent-input" step="any"></td>
-                                    <td><input type="number" name="items[0][discount]" class="form-control form-control-sm text-end discount-input bg-light" readonly></td>
+                                    <td><input type="number" name="items[0][disc_percent]" class="form-control form-control-sm text-center disc-percent-input" step="any" placeholder="0"></td>
+                                    <td><input type="number" name="items[0][discount]" class="form-control form-control-sm text-end discount-input" step="any" placeholder="0.00"></td>
                                     <td><input type="number" name="items[0][total]" class="form-control form-control-sm text-end fw-bold total-input bg-light" readonly></td>
                                     <td>
                                         <input type="text" name="items[0][location]" class="form-control form-control-sm text-center location-input bg-light" value="Main Stock" readonly>
@@ -250,11 +245,21 @@
                                 <div class="card-body p-2">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="small fw-bold">Sub Total</span>
-                                        <input type="text" class="form-control form-control-sm text-end w-50 bg-white summary-subtotal" readonly>
+                                        <input type="text" class="form-control form-control-sm text-end w-50 bg-white summary-subtotal" readonly placeholder="0.00">
+                                    </div>
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-6">
+                                            <label class="small fw-bold mb-0">Discount %</label>
+                                            <input type="number" name="header_discount_percent" class="form-control form-control-sm text-center header-discount-percent" step="any" placeholder="0">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small fw-bold mb-0">Discount</label>
+                                            <input type="number" name="header_discount_amount" class="form-control form-control-sm text-end header-discount-amount" step="any" placeholder="0.00">
+                                        </div>
                                     </div>
                                     <div class="d-flex justify-content-between">
                                         <span class="small fw-bold h6 text-primary">Total</span>
-                                        <input type="text" class="form-control form-control-sm text-end w-50 bg-white fw-bold text-primary summary-total" readonly>
+                                        <input type="text" class="form-control form-control-sm text-end w-50 bg-white fw-bold text-primary summary-total" readonly placeholder="0.00">
                                     </div>
                                 </div>
                             </div>
@@ -430,30 +435,36 @@
                 }
             },
 
-            calculateRow(rowIndex, rowElement) {
+            calculateRow(rowIndex, rowElement, sourceField = 'disc_percent') {
                 if (!this.data[rowIndex]) return;
                 
                 const dataRow = this.data[rowIndex];
                 dataRow.amount = dataRow.qty * dataRow.rate;
-                dataRow.discount = (dataRow.amount * dataRow.disc_percent) / 100;
+                
+                if (sourceField === 'disc_percent') {
+                    dataRow.discount = (dataRow.amount * dataRow.disc_percent) / 100;
+                    rowElement.querySelector('.discount-input').value = dataRow.discount > 0 ? dataRow.discount.toFixed(2) : '';
+                } else if (sourceField === 'discount') {
+                    dataRow.disc_percent = 0;
+                    rowElement.querySelector('.disc-percent-input').value = '';
+                }
+
                 dataRow.total = dataRow.amount - dataRow.discount;
 
                 // Sync UI
                 rowElement.querySelector('.amount-input').value = dataRow.amount.toFixed(2);
-                rowElement.querySelector('.discount-input').value = dataRow.discount.toFixed(2);
                 rowElement.querySelector('.total-input').value = dataRow.total.toFixed(2);
 
                 this.calculateGrandTotal();
             },
 
-            calculateGrandTotal() {
+            calculateGrandTotal(sourceField = 'none') {
                 let grandQty = 0;
                 let grandAmount = 0;
                 let grandDiscount = 0;
-                let grandTotal = 0;
+                let grandTotal = 0; 
 
                 this.data.forEach(row => {
-                    // Using parsed values for safety
                     grandQty += parseFloat(row.qty) || 0;
                     grandAmount += parseFloat(row.amount) || 0;
                     grandDiscount += parseFloat(row.discount) || 0;
@@ -464,9 +475,29 @@
                 document.querySelector('.footer-amount').value = grandAmount.toFixed(2);
                 document.querySelector('.footer-discount').value = grandDiscount.toFixed(2);
                 document.querySelector('.footer-total').value = grandTotal.toFixed(2);
-                document.querySelector('.footer-grand-total').value = grandTotal.toFixed(2);
-                document.querySelector('.summary-subtotal').value = grandAmount.toFixed(2);
-                document.querySelector('.summary-total').value = grandTotal.toFixed(2);
+                
+                // Summary calculation
+                const subTotal = grandTotal; // Sum of row net totals
+                document.querySelector('.summary-subtotal').value = subTotal.toFixed(2);
+                
+                const headerDiscPercentInput = document.querySelector('.header-discount-percent');
+                const headerDiscAmountInput = document.querySelector('.header-discount-amount');
+                
+                let headerDiscPercent = parseFloat(headerDiscPercentInput.value) || 0;
+                let headerDiscAmount = parseFloat(headerDiscAmountInput.value) || 0;
+                
+                if (sourceField === 'header_percent') {
+                    headerDiscAmount = (subTotal * headerDiscPercent) / 100;
+                    headerDiscAmountInput.value = headerDiscAmount > 0 ? headerDiscAmount.toFixed(2) : '';
+                } else if (sourceField === 'header_amount') {
+                    headerDiscPercent = 0;
+                    headerDiscPercentInput.value = '';
+                }
+                
+                const finalTotal = subTotal - headerDiscAmount;
+                
+                document.querySelector('.summary-total').value = finalTotal.toFixed(2);
+                document.querySelector('.footer-grand-total').value = finalTotal.toFixed(2);
             }
         };
 
@@ -565,6 +596,18 @@
                 new TomSelect(productSelect, {
                     create: false,
                     sortField: { field: "text", order: "asc" },
+                    dropdownParent: 'body',
+                    render: {
+                        option: function(data, escape) {
+                            return `<div class="px-2 py-1">
+                                        <div class="fw-bold fs-12">${escape(data.text)}</div>
+                                        <div class="text-muted fs-10">${escape(data.name)}</div>
+                                    </div>`;
+                        },
+                        item: function(data, escape) {
+                            return `<div title="${escape(data.name)}">${escape(data.text)}</div>`;
+                        }
+                    },
                     onChange: function(value) {
                         let selectedOption = null;
                         if (value) {
@@ -586,14 +629,25 @@
                 });
             }
 
-            [qtyInput, rateInput, discPercentInput].forEach(input => {
+            const discountInput = row.querySelector('.discount-input');
+
+            [qtyInput, rateInput, discPercentInput, discountInput].forEach(input => {
                 input.addEventListener('input', function() {
                     let fieldName = 'qty';
+                    let sourceField = 'disc_percent';
+
                     if (this.classList.contains('rate-input')) fieldName = 'rate';
-                    if (this.classList.contains('disc-percent-input')) fieldName = 'disc_percent';
+                    if (this.classList.contains('disc-percent-input')) {
+                        fieldName = 'disc_percent';
+                        sourceField = 'disc_percent';
+                    }
+                    if (this.classList.contains('discount-input')) {
+                        fieldName = 'discount';
+                        sourceField = 'discount';
+                    }
                     
                     salesOrderController.updateRowData(rowIndex, fieldName, parseFloat(this.value) || 0);
-                    salesOrderController.calculateRow(rowIndex, row);
+                    salesOrderController.calculateRow(rowIndex, row, sourceField);
                 });
             });
         }
@@ -637,6 +691,22 @@
         }
 
         // Handled completely by header dropdown now.
+
+        // Header Discount Events
+        const headerDiscPercentInput = document.querySelector('.header-discount-percent');
+        const headerDiscAmountInput = document.querySelector('.header-discount-amount');
+        
+        if (headerDiscPercentInput) {
+            headerDiscPercentInput.addEventListener('input', () => {
+                salesOrderController.calculateGrandTotal('header_percent');
+            });
+        }
+        
+        if (headerDiscAmountInput) {
+            headerDiscAmountInput.addEventListener('input', () => {
+                salesOrderController.calculateGrandTotal('header_amount');
+            });
+        }
 
         customerSelect.addEventListener('change', function () {
             fetchCustomerDetails(this.value);
