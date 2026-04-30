@@ -104,6 +104,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/approvals/{id}/reject', [App\Http\Controllers\UserApprovalController::class , 'reject'])->name('approvals.reject');
     Route::get('/approvals/count', [App\Http\Controllers\UserApprovalController::class , 'count'])->name('approvals.count');
 
+    Route::get('pay-bills/{id}/print', [\App\Http\Controllers\PayBillController::class, 'print'])->name('pay-bills.print');
     Route::resource('pay-bills', \App\Http\Controllers\PayBillController::class);
 
     // Profile Routes
