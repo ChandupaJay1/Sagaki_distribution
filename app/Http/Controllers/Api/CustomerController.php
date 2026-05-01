@@ -85,4 +85,30 @@ class CustomerController extends Controller
 
         return response()->json(['message' => 'Customer deleted successfully'], 200);
     }
+
+    public function getOutstandingInvoices($id)
+    {
+        $customer = Customer::find($id);
+        if (!$customer) {
+            return response()->json(['message' => 'Customer not found'], 404);
+        }
+
+        // Fetch Invoices for this customer
+        $invoices = \App\Models\Invoice::where('customer_id', $id)
+            ->select('id', 'date', 'invoice_no', 'total_amount')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // Fetch Sales Returns (Credits) for this customer
+        $credits = \App\Models\SalesReturn::where('customer_id', $id)
+            ->select('id', 'date', 'return_no', 'total_amount')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        return response()->json([
+            'customer' => $customer,
+            'invoices' => $invoices,
+            'credits' => $credits
+        ]);
+    }
 }

@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
-@section('title', 'Pay Bills - Create')
+@section('title', $type . ' Bills - Create')
 
 @section('content')
 <div class="row">
     <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">Pay Bills</h4>
+            <h4 class="mb-sm-0">{{ $type }} Bills</h4>
             <div class="d-flex align-items-center gap-2">
                 <span class="badge bg-danger-subtle text-danger"><i class="ri-error-warning-line me-1"></i>Date Control is Inactive.</span>
                 <span class="text-muted small fw-bold">Rs: <span id="headerTotalAmount">0.00</span></span>
@@ -19,7 +19,7 @@
     <div class="col-lg-12">
         <div class="card">
             <div class="card-header bg-soft-secondary d-flex justify-content-between align-items-center py-2">
-                <h5 class="card-title mb-0"><i class="ri-money-dollar-circle-line me-1"></i>Pay Bills</h5>
+                <h5 class="card-title mb-0"><i class="ri-money-dollar-circle-line me-1"></i>{{ $type }} Bills</h5>
                 <div class="float-end">
                     <button type="submit" form="createPayBillForm" name="action" value="pay_and_new" class="btn btn-info btn-sm me-1"><i class="ri-add-circle-fill me-1"></i>Pay And New</button>
                     <button type="submit" form="createPayBillForm" name="action" value="pay_selected" class="btn btn-success btn-sm me-1"><i class="ri-check-fill me-1"></i>Pay Selected Bill</button>
@@ -41,17 +41,28 @@
 
                 <form id="createPayBillForm" action="{{ route('pay-bills.store') }}" method="POST">
                     @csrf
+                    <input type="hidden" name="type" value="{{ $type }}">
 
                     <!-- Header Row 1 -->
                     <div class="row g-2 mb-2">
                         <div class="col-md-4">
-                            <label class="form-label small fw-bold mb-1">Vendor Name <span class="text-danger">*</span></label>
-                            <select name="vendor_id" id="vendorSelect" class="form-select form-select-sm" required>
-                                <option value="">-- Select Vendor --</option>
-                                @foreach($vendors as $v)
-                                    <option value="{{ $v->id }}">{{ $v->company_name ?? $v->name }}</option>
-                                @endforeach
-                            </select>
+                            @if($type === 'Supplier')
+                                <label class="form-label small fw-bold mb-1">Vendor Name <span class="text-danger">*</span></label>
+                                <select name="vendor_id" id="vendorSelect" class="form-select form-select-sm" required>
+                                    <option value="">-- Select Vendor --</option>
+                                    @foreach($vendors as $v)
+                                        <option value="{{ $v->id }}">{{ $v->company_name ?? $v->name }}</option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <label class="form-label small fw-bold mb-1">Customer Name <span class="text-danger">*</span></label>
+                                <select name="customer_id" id="customerSelect" class="form-select form-select-sm" required>
+                                    <option value="">-- Select Customer --</option>
+                                    @foreach($customers as $c)
+                                        <option value="{{ $c->id }}">{{ $c->company_name ?? $c->name }}</option>
+                                    @endforeach
+                                </select>
+                            @endif
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold mb-1">Site <span class="text-danger">*</span></label>
@@ -72,7 +83,7 @@
                     <div class="row g-2 mb-2">
                         <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Balance</label>
-                            <input type="text" id="vendorBalance" class="form-control form-control-sm bg-light" readonly placeholder="0.00">
+                            <input type="text" id="entityBalance" class="form-control form-control-sm bg-light" readonly placeholder="0.00">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Method <span class="text-danger">*</span></label>
@@ -113,9 +124,9 @@
                         <table class="table table-sm table-bordered mb-0 align-middle text-center" id="billsTable" style="border-top:2px solid #3577f1;">
                             <thead class="bg-primary text-white">
                                 <tr>
-                                    <th class="fw-bold py-2">Date Due</th>
-                                    <th class="fw-bold py-2">Ref No</th>
-                                    <th class="fw-bold py-2">Bill No</th>
+                                    <th class="fw-bold py-2">Date</th>
+                                    <th class="fw-bold py-2">Ref No / JO No</th>
+                                    <th class="fw-bold py-2">Bill No / Inv No</th>
                                     <th class="fw-bold py-2">Type</th>
                                     <th class="fw-bold py-2">Amt.Due</th>
                                     <th class="fw-bold py-2">Discount</th>
@@ -125,7 +136,7 @@
                             </thead>
                             <tbody id="billsTableBody">
                                 <tr class="empty-row">
-                                    <td colspan="8" class="py-4 text-muted small italic bg-light">Select a vendor to load outstanding bills.</td>
+                                    <td colspan="8" class="py-4 text-muted small italic bg-light">Select a {{ $type === 'Supplier' ? 'vendor' : 'customer' }} to load outstanding bills.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -147,7 +158,7 @@
                                     <div class="bg-light p-3 rounded d-flex justify-content-between align-items-center mb-3 border">
                                         <div>
                                             <p class="mb-2 text-dark small fw-medium">Number of credit available: <span id="creditCount">0</span></p>
-                                            <p class="mb-0 text-dark small fw-medium">This vendor has credit available <span class="fw-bold ms-5 fs-15" id="availableCreditSpan">0.00</span></p>
+                                            <p class="mb-0 text-dark small fw-medium">This {{ $type === 'Supplier' ? 'vendor' : 'customer' }} has credit available <span class="fw-bold ms-5 fs-15" id="availableCreditSpan">0.00</span></p>
                                         </div>
                                         <button type="button" id="viewCreditsBtn" class="btn btn-primary btn-sm"><i class="ri-bank-card-line me-1"></i>View</button>
                                     </div>
@@ -232,24 +243,45 @@
 </div>
 
 <style>
-    #billsTable th, #billsTable td { padding: 0.25rem 0.5rem !important; font-size: 0.75rem !important; }
-    #billsTable .form-control-sm { padding: 0.1rem 0.3rem !important; font-size: 0.75rem !important; min-height: 26px !important; }
-    .bg-soft-secondary { background-color: rgba(235, 237, 240, 0.5); }
+    /* Dark Theme Refinement based on image_676f5a.jpg */
+    .card { background-color: #1a1d21; border: 1px solid #2d3238; color: #ced4da; }
+    .card-header { background-color: #212529 !important; border-bottom: 1px solid #2d3238; color: #fff; }
+    .form-label { color: #adb5bd; }
+    .form-control, .form-select { background-color: #212529; border: 1px solid #32383e; color: #ced4da; }
+    .form-control:focus, .form-select:focus { background-color: #2b3035; border-color: #3577f1; color: #fff; }
+    .form-control:disabled, .form-select:disabled, .bg-light { background-color: #16191c !important; border-color: #2d3238 !important; color: #8a929a !important; }
+    
+    /* Table Styling */
+    #billsTable { border-color: #2d3238; }
+    #billsTable thead th { background-color: #4b38b3 !important; color: #fff; border-color: #2d3238; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; }
+    #billsTable tbody td { background-color: #1a1d21; color: #ced4da; border-color: #2d3238; }
+    #billsTable tr:hover td { background-color: #212529; }
+    
+    /* Credits & Totals Panel */
+    .nav-tabs-custom .nav-link { color: #8a929a; }
+    .nav-tabs-custom .nav-link.active { background-color: transparent; color: #0ab39c; border-bottom-color: #0ab39c; }
+    .bg-light.p-3.rounded { background-color: #212529 !important; border: 1px solid #2d3238 !important; }
+    .text-dark { color: #ced4da !important; }
+    .border-top { border-top: 1px solid #2d3238 !important; }
+
+    /* Button Styling from screenshot */
     .btn-info { background-color: #0dcaf0; border-color: #0dcaf0; color: #fff; }
     .btn-info:hover { background-color: #0bb5d9; border-color: #0bb5d9; color: #fff; }
     .btn-success { background-color: #0ab39c; border-color: #0ab39c; }
     .btn-warning { background-color: #f7b84b; border-color: #f7b84b; color: #fff; }
-    .nav-tabs-custom.nav-success .nav-link.active { color: #0ab39c; }
-    .nav-tabs-custom.nav-success .nav-link.active::after { background-color: #0ab39c; }
+    
+    #billsTable th, #billsTable td { padding: 0.25rem 0.5rem !important; font-size: 0.75rem !important; }
+    #billsTable .form-control-sm { padding: 0.1rem 0.3rem !important; font-size: 0.75rem !important; min-height: 26px !important; }
 </style>
 @endsection
 
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const vendorSelectWrapper = document.getElementById('vendorSelect');
+        const type = "{{ $type }}";
+        const entitySelectWrapper = document.getElementById(type === 'Supplier' ? 'vendorSelect' : 'customerSelect');
         const billsTableBody = document.getElementById('billsTableBody');
-        const vendorBalanceInput = document.getElementById('vendorBalance');
+        const entityBalanceInput = document.getElementById('entityBalance');
         const lkrTotalAmountInput = document.getElementById('lkrTotalAmount');
         const paymentMethodSelect = document.getElementById('paymentMethod');
         const chequeNoInput = document.getElementById('chequeNo');
@@ -261,18 +293,17 @@
 
         let cachedCredits = [];
 
-        // Handle Vendor selection
-        const initVendorSelect = () => {
-            if (vendorSelectWrapper.tomselect) {
-                vendorSelectWrapper.tomselect.on('change', function(value) {
+        // Handle Entity selection
+        const initEntitySelect = () => {
+            if (entitySelectWrapper.tomselect) {
+                entitySelectWrapper.tomselect.on('change', function(value) {
                     fetchOutstandingBills(value);
                 });
             } else {
-                // Wait for global init or do it manually if needed
-                setTimeout(initVendorSelect, 100);
+                setTimeout(initEntitySelect, 100);
             }
         };
-        initVendorSelect();
+        initEntitySelect();
 
         // Handle View Credits button
         viewCreditsBtn.addEventListener('click', function() {
@@ -294,38 +325,61 @@
             }
         });
 
-        function fetchOutstandingBills(vendorId) {
-            if (!vendorId) {
+        // Form Validation before submission
+        document.getElementById('createPayBillForm').addEventListener('submit', function(e) {
+            const entityId = entitySelectWrapper.value;
+            const totalPay = parseFloat(document.getElementById('totalToPayInput').value) || 0;
+
+            if (!entityId) {
+                e.preventDefault();
+                alert(`Please select a ${type === 'Supplier' ? 'Vendor' : 'Customer'} first.`);
+                return false;
+            }
+
+            if (totalPay <= 0) {
+                e.preventDefault();
+                alert('Total payment amount must be greater than zero.');
+                return false;
+            }
+        });
+
+        function fetchOutstandingBills(entityId) {
+            if (!entityId) {
                 clearTable();
                 return;
             }
 
-            // Show loading
-            billsTableBody.innerHTML = '<tr><td colspan="8" class="py-4 text-center bg-light"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Loading bills...</td></tr>';
+            billsTableBody.innerHTML = '<tr><td colspan="8" class="py-4 text-center bg-light"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Loading...</td></tr>';
 
-            fetch(`/api/vendors/${vendorId}/outstanding-bills`)
+            const endpoint = type === 'Supplier' 
+                ? `/api/vendors/${entityId}/outstanding-bills` 
+                : `/api/customers/${entityId}/outstanding-invoices`;
+
+            fetch(endpoint)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.vendor) {
-                        vendorBalanceInput.value = parseFloat(data.vendor.credit_limit || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+                    const entity = type === 'Supplier' ? data.vendor : data.customer;
+                    const items = type === 'Supplier' ? data.bills : data.invoices;
+
+                    if (entity) {
+                        entityBalanceInput.value = parseFloat(entity.credit_limit || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
                     }
                     
-                    // Cache and update credit info
                     cachedCredits = data.credits || [];
                     let totalCredit = cachedCredits.reduce((sum, c) => sum + parseFloat(c.total_amount), 0);
                     availableCreditSpan.textContent = totalCredit.toLocaleString(undefined, {minimumFractionDigits: 2});
                     creditCountSpan.textContent = cachedCredits.length;
 
-                    if (data.bills && data.bills.length > 0) {
-                        renderBills(data.bills);
+                    if (items && items.length > 0) {
+                        renderBills(items);
                     } else {
-                        billsTableBody.innerHTML = '<tr><td colspan="8" class="py-4 text-muted bg-light">No outstanding bills found.</td></tr>';
+                        billsTableBody.innerHTML = `<tr><td colspan="8" class="py-4 text-muted bg-light">No outstanding ${type === 'Supplier' ? 'bills' : 'invoices'} found.</td></tr>`;
                         updateTotals();
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    billsTableBody.innerHTML = '<tr><td colspan="8" class="py-4 text-danger bg-light">Error loading bills. Please try again.</td></tr>';
+                    billsTableBody.innerHTML = '<tr><td colspan="8" class="py-4 text-danger bg-light">Error loading data. Please try again.</td></tr>';
                 });
         }
 
@@ -354,21 +408,25 @@
             creditsTableBody.innerHTML = html;
         }
 
-        function renderBills(bills) {
+        function renderBills(items) {
             let html = '';
-            bills.forEach((bill, index) => {
-                const totalAmount = parseFloat(bill.total_amount) || 0;
+            items.forEach((item, index) => {
+                const totalAmount = parseFloat(item.total_amount) || 0;
+                const billNo = type === 'Supplier' ? item.grn_no : item.invoice_no;
+                const refNo = type === 'Supplier' ? (item.reference_no || '—') : '—';
+                const idField = type === 'Supplier' ? 'grn_id' : 'invoice_id';
+
                 html += `
                 <tr class="bill-row">
-                    <td>${bill.due_date || '—'}</td>
-                    <td>${bill.reference_no || '—'}</td>
-                    <td>${bill.grn_no || '—'}</td>
-                    <td class="text-muted">Bill</td>
+                    <td>${item.date || '—'}</td>
+                    <td>${refNo}</td>
+                    <td>${billNo || '—'}</td>
+                    <td class="text-muted">${type === 'Supplier' ? 'Bill' : 'Invoice'}</td>
                     <td class="text-end">${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                     <td><input type="text" class="form-control form-control-sm text-end bg-light" readonly value="0.00"></td>
                     <td><input type="text" class="form-control form-control-sm text-end bg-light" readonly value="0.00"></td>
                     <td>
-                        <input type="hidden" name="items[${index}][grn_id]" value="${bill.id}">
+                        <input type="hidden" name="items[${index}][${idField}]" value="${item.id}">
                         <input type="number" name="items[${index}][amount_to_pay]" class="form-control form-control-sm text-end pay-input" 
                                step="any" min="0" max="${totalAmount}" data-due="${totalAmount}" placeholder="0.00">
                     </td>
@@ -380,9 +438,9 @@
         }
 
         function clearTable() {
-            billsTableBody.innerHTML = '<tr class="empty-row"><td colspan="8" class="py-4 text-muted small italic bg-light">Select a vendor to load outstanding bills.</td></tr>';
+            billsTableBody.innerHTML = `<tr class="empty-row"><td colspan="8" class="py-4 text-muted small italic bg-light">Select a ${type === 'Supplier' ? 'vendor' : 'customer'} to load outstanding bills.</td></tr>`;
             creditsTableBody.innerHTML = '<tr><td colspan="6" class="py-3 bg-light text-muted small">No credits available</td></tr>';
-            vendorBalanceInput.value = '0.00';
+            entityBalanceInput.value = '0.00';
             availableCreditSpan.textContent = '0.00';
             creditCountSpan.textContent = '0';
             cachedCredits = [];
