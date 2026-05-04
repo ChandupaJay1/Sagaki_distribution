@@ -7,7 +7,9 @@ use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/customers/{id}', [CustomerController::class, 'show']);
+Route::get('/customers/{id}/outstanding-invoices', [CustomerController::class, 'getOutstandingInvoices']);
 Route::get('/vendors/{id}', [VendorController::class, 'show']);
+Route::get('/vendors/{id}/outstanding-bills', [VendorController::class, 'getOutstandingBills']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 Route::get('/products/{id}/stock', [ProductController::class, 'stock']);
 
