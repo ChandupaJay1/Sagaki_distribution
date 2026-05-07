@@ -294,19 +294,12 @@
                         </div>
                     </div>
 
-<<<<<<< HEAD
                     <!-- Full Width Credits Table (Blue Circled in Image) -->
                     <div class="row mt-2">
                         <div class="col-12">
                             <div class="table-responsive mb-3 border rounded shadow-sm">
                                 <table class="table table-sm table-bordered mb-0 align-middle text-center" style="border-top:2px solid #3577f1;">
                                     <thead class="bg-primary text-white">
-=======
-                            <!-- Credits Table -->
-                            <div class="table-responsive mb-3 border rounded">
-                                <table class="table table-sm mb-0 align-middle text-center">
-                                    <thead>
->>>>>>> 913b2f98292aa583ed4456f295deaf6aa9fdf31f
                                         <tr>
                                             <th class="fw-bold py-2 small">Date</th>
                                             <th class="fw-bold py-2 small">Transaction No</th>
@@ -323,44 +316,7 @@
                                     </tbody>
                                 </table>
                                 <div class="text-end p-2 border-top bg-white">
-<<<<<<< HEAD
                                     <button type="button" class="btn btn-primary btn-sm"><i class="ri-settings-3-line me-1"></i>Set Credit</button>
-=======
-                                    <button type="button" class="btn btn-primary btn-sm"><i class="ri-add-circle-fill me-1"></i>Set Credit</button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Right Panel (Totals) -->
-                        <div class="col-md-5">
-                            <div class="summary-box mb-3">
-                                <h6 class="fw-bold mb-3 text-dark fs-14">Total Payment</h6>
-                                <div class="d-flex justify-content-between align-items-center mb-2 small text-dark">
-                                    <span style="width: 120px;">Amount Due</span>
-                                    <span>:</span>
-                                    <span id="summaryAmountDue" class="text-end flex-grow-1 fw-medium">0.00</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2 small text-dark">
-                                    <span style="width: 120px;">Payment</span>
-                                    <span>:</span>
-                                    <span id="summaryPayment" class="text-end flex-grow-1 fw-medium">0.00</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2 small text-dark">
-                                    <span style="width: 120px;">Credit</span>
-                                    <span>:</span>
-                                    <span id="summaryCredit" class="text-end flex-grow-1 fw-medium">0.00</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2 small text-dark">
-                                    <span style="width: 120px;">Discount</span>
-                                    <span>:</span>
-                                    <span id="summaryDiscount" class="text-end flex-grow-1 fw-medium">0.00</span>
-                                </div>
-                                <div class="total-row d-flex justify-content-between align-items-center mt-3 small text-dark fw-bold fs-13">
-                                    <span style="width: 120px;">Total Payment</span>
-                                    <span>:</span>
-                                    <span id="summaryTotalPayment" class="text-end flex-grow-1">0.00</span>
-                                    <input type="hidden" name="total_amount" id="totalToPayInput" value="0">
->>>>>>> 913b2f98292aa583ed4456f295deaf6aa9fdf31f
                                 </div>
                             </div>
                         </div>
