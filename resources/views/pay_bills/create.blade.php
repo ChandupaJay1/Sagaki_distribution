@@ -6,10 +6,10 @@
 <div class="row">
     <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{ $type }} Bills</h4>
+            <h4 class="mb-sm-0">{{ $type === 'Customer' ? 'Customer Payment' : 'Supplier Payment' }}</h4>
             <div class="d-flex align-items-center gap-2">
                 <span class="badge bg-danger-subtle text-danger"><i class="ri-error-warning-line me-1"></i>Date Control is Inactive.</span>
-                <span class="text-muted small fw-bold">Rs: <span id="headerTotalAmount">0.00</span></span>
+                <span class="text-muted small fw-bold"><i class="ri-money-dollar-circle-line me-1"></i>Rs: <span id="headerTotalAmount">0.00</span></span>
             </div>
         </div>
     </div>
@@ -42,12 +42,14 @@
                 <form id="createPayBillForm" action="{{ route('pay-bills.store') }}" method="POST">
                     @csrf
                     <input type="hidden" name="type" value="{{ $type }}">
+                    <input type="hidden" id="entityBalance">
+                    <span id="creditCount" class="d-none"></span>
 
                     <!-- Header Row 1 -->
                     <div class="row g-2 mb-2">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             @if($type === 'Supplier')
-                                <label class="form-label small fw-bold mb-1">Vendor Name <span class="text-danger">*</span></label>
+                                <label class="form-label small fw-bold mb-1">Paid To <span class="text-danger">*</span></label>
                                 <select name="vendor_id" id="vendorSelect" class="form-select form-select-sm" required>
                                     <option value="">-- Select Vendor --</option>
                                     @foreach($vendors as $v)
@@ -55,7 +57,7 @@
                                     @endforeach
                                 </select>
                             @else
-                                <label class="form-label small fw-bold mb-1">Customer Name <span class="text-danger">*</span></label>
+                                <label class="form-label small fw-bold mb-1">Received From <span class="text-danger">*</span></label>
                                 <select name="customer_id" id="customerSelect" class="form-select form-select-sm" required>
                                     <option value="">-- Select Customer --</option>
                                     @foreach($customers as $c)
@@ -64,7 +66,13 @@
                                 </select>
                             @endif
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Class</label>
+                            <select class="form-select form-select-sm bg-light" disabled>
+                                <option value="">-- Select Class --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Site <span class="text-danger">*</span></label>
                             <select name="location_id" class="form-select form-select-sm" required>
                                 <option value="">-- Select Site --</option>
@@ -73,49 +81,99 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold mb-1">Voucher No</label>
-                            <input type="text" name="voucher_no" class="form-control form-control-sm bg-light" value="{{ $nextVoucherNo }}" readonly>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Account <span class="text-danger">*</span></label>
+                            <select name="account_id" class="form-select form-select-sm" required>
+                                <option value="">-- Select Account --</option>
+                                @foreach($accounts as $acc)
+                                    <option value="{{ $acc->id }}">{{ $acc->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
 
                     <!-- Header Row 2 -->
                     <div class="row g-2 mb-2">
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold mb-1">Balance</label>
-                            <input type="text" id="entityBalance" class="form-control form-control-sm bg-light" readonly placeholder="0.00">
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-1">Deposit To <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm bg-light" disabled>
+                                <option value="">LKR</option>
+                            </select>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold mb-1">Method <span class="text-danger">*</span></label>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-1">Amount <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light border-end-0 small">LKR</span>
+                                <input type="text" id="displayAmount" class="form-control form-control-sm border-start-0 text-end" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label small fw-bold mb-1">Ex.Rate</label>
+                            <input type="text" class="form-control form-control-sm text-center bg-light" value="1.00" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-1">Pmt.Method <span class="text-danger">*</span></label>
                             <select name="payment_method" id="paymentMethod" class="form-select form-select-sm" required>
                                 <option value="Cash">Cash</option>
                                 <option value="Cheque">Cheque</option>
                                 <option value="Bank Transfer">Bank Transfer</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label small fw-bold mb-1">Cheque No</label>
                             <input type="text" name="cheque_no" id="chequeNo" class="form-control form-control-sm" placeholder="Cheque No" disabled>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label small fw-bold mb-1">Date <span class="text-danger">*</span></label>
-                            <input type="date" name="date" class="form-control form-control-sm" value="{{ date('Y-m-d') }}" required>
+                            <label class="form-label small fw-bold mb-1">Cus Pay No</label>
+                            <input type="text" name="voucher_no" class="form-control form-control-sm bg-light" value="{{ $nextVoucherNo }}" readonly>
                         </div>
                     </div>
 
                     <!-- Header Row 3 -->
                     <div class="row g-2 mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Memo</label>
                             <textarea name="memo" class="form-control form-control-sm" rows="1" placeholder="Memo"></textarea>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold mb-1">LKR Total Amount</label>
-                            <input type="text" id="lkrTotalAmount" class="form-control form-control-sm bg-light" readonly placeholder="0.00">
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-1">Receipt Number</label>
+                            <input type="text" class="form-control form-control-sm" placeholder="Receipt Number">
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold mb-1">PD Cheque Date</label>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-1">LKR Total Amount</label>
+                            <input type="text" id="lkrTotalAmount" class="form-control form-control-sm bg-light text-end" readonly placeholder="0.00">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-1">Rep <span class="text-danger">*</span></label>
+                            <select name="rep_id" class="form-select form-select-sm">
+                                <option value="">-- Select Rep --</option>
+                                @foreach($reps ?? [] as $rep)
+                                    <option value="{{ $rep->id }}">{{ $rep->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label small fw-bold mb-1">Pmt.Type</label>
+                            <select class="form-select form-select-sm bg-light" disabled>
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label small fw-bold mb-1">Cheque Date</label>
                             <input type="date" name="pd_cheque_date" id="pdChequeDate" class="form-control form-control-sm" disabled>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label small fw-bold mb-1">Date <span class="text-danger">*</span></label>
+                            <input type="date" name="date" class="form-control form-control-sm" value="{{ date('Y-m-d') }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Job No</label>
+                            <select class="form-select form-select-sm bg-light" disabled>
+                                <option value="">-- Select Job No --</option>
+                            </select>
                         </div>
                     </div>
 
@@ -125,13 +183,13 @@
                             <thead class="bg-primary text-white">
                                 <tr>
                                     <th class="fw-bold py-2">Date</th>
-                                    <th class="fw-bold py-2">Ref No / JO No</th>
-                                    <th class="fw-bold py-2">Bill No / Inv No</th>
                                     <th class="fw-bold py-2">Type</th>
+                                    <th class="fw-bold py-2">Number</th>
+                                    <th class="fw-bold py-2">Orig.Amt.</th>
                                     <th class="fw-bold py-2">Amt.Due</th>
+                                    <th class="fw-bold py-2">Cr in use</th>
                                     <th class="fw-bold py-2">Discount</th>
-                                    <th class="fw-bold py-2">Credit Used</th>
-                                    <th class="fw-bold py-2" style="width: 150px;">Amt.To Pay</th>
+                                    <th class="fw-bold py-2" style="width: 150px;">New Payment</th>
                                 </tr>
                             </thead>
                             <tbody id="billsTableBody">
@@ -143,7 +201,7 @@
                     </div>
 
                     <div class="row mt-3">
-                        <!-- Left Panel -->
+                        <!-- Left Panel: Tabs -->
                         <div class="col-md-7">
                             <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist">
                                 <li class="nav-item">
@@ -152,15 +210,17 @@
                                 <li class="nav-item">
                                     <a class="nav-link" data-bs-toggle="tab" href="#discount-tab" role="tab" aria-selected="false">Discount</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#credit-card-tab" role="tab" aria-selected="false">Credit Card</a>
+                                </li>
                             </ul>
                             <div class="tab-content text-muted p-0">
                                 <div class="tab-pane active" id="credits-tab" role="tabpanel">
                                     <div class="bg-light p-3 rounded d-flex justify-content-between align-items-center mb-3 border">
-                                        <div>
-                                            <p class="mb-2 text-dark small fw-medium">Number of credit available: <span id="creditCount">0</span></p>
-                                            <p class="mb-0 text-dark small fw-medium">This {{ $type === 'Supplier' ? 'vendor' : 'customer' }} has credit available <span class="fw-bold ms-5 fs-15" id="availableCreditSpan">0.00</span></p>
+                                        <div class="flex-grow-1">
+                                            <p class="mb-0 text-dark small fw-medium">This {{ $type === 'Supplier' ? 'vendor' : 'customer' }} has credit available <span class="fw-bold ms-5 fs-15 text-primary" id="availableCreditSpan">0.00</span></p>
                                         </div>
-                                        <button type="button" id="viewCreditsBtn" class="btn btn-primary btn-sm"><i class="ri-bank-card-line me-1"></i>View</button>
+                                        <button type="button" id="viewCreditsBtn" class="btn btn-primary btn-sm"><i class="ri-eye-line me-1"></i>View</button>
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="discount-tab" role="tabpanel">
@@ -168,10 +228,67 @@
                                         <p class="text-muted small mb-0">No discounts applied.</p>
                                     </div>
                                 </div>
+                                <div class="tab-pane" id="credit-card-tab" role="tabpanel">
+                                    <div class="bg-light p-3 rounded mb-3 border">
+                                        <p class="text-muted small mb-0">No credit card info.</p>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                        
+                        <!-- Right Panel: Amount for Select Invoice -->
+                        <div class="col-md-5">
+                            <div class="bg-light p-3 rounded mb-3 border">
+                                <h6 class="fw-bold mb-3 text-dark fs-14">Amount for Select Invoice</h6>
+                                <div class="row g-2 align-items-center mb-2">
+                                    <div class="col-4">
+                                        <label class="form-label small mb-0">Amount Due</label>
+                                    </div>
+                                    <div class="col-8">
+                                        <input type="text" id="summaryAmountDue" class="form-control form-control-sm text-end bg-light fw-bold" readonly value="0.00">
+                                    </div>
+                                </div>
+                                <div class="row g-2 align-items-center mb-2">
+                                    <div class="col-4">
+                                        <label class="form-label small mb-0">Applied</label>
+                                    </div>
+                                    <div class="col-8">
+                                        <input type="text" id="summaryPayment" class="form-control form-control-sm text-end bg-light fw-bold text-success" readonly value="0.00">
+                                    </div>
+                                </div>
+                                <div class="row g-2 align-items-center mb-2">
+                                    <div class="col-4">
+                                        <label class="form-label small mb-0">Over payment amount</label>
+                                    </div>
+                                    <div class="col-8">
+                                        <input type="text" id="summaryCredit" class="form-control form-control-sm text-end bg-light fw-bold text-info" readonly value="0.00">
+                                    </div>
+                                </div>
+                                <div class="row g-2 align-items-center mb-0 border-top pt-2 mt-2">
+                                    <div class="col-4">
+                                        <label class="form-label small mb-0 fw-bold">Total Payment</label>
+                                    </div>
+                                    <div class="col-8">
+                                        <input type="text" id="summaryTotalPayment" class="form-control form-control-sm text-end bg-light fw-bold text-primary" readonly value="0.00">
+                                    </div>
+                                </div>
+                                <div class="row g-2 align-items-center mb-0 d-none">
+                                    <div class="col-4">
+                                        <label class="form-label small mb-0">Discount</label>
+                                    </div>
+                                    <div class="col-8">
+                                        <input type="text" id="summaryDiscount" class="form-control form-control-sm text-end bg-light" readonly value="0.00">
+                                    </div>
+                                </div>
+                                <input type="hidden" name="total_amount" id="totalToPayInput" value="0">
+                            </div>
+                        </div>
+                    </div>
 
-                            <!-- Credits Table -->
-                            <div class="table-responsive mb-3 border rounded">
+                    <!-- Full Width Credits Table (Blue Circled in Image) -->
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="table-responsive mb-3 border rounded shadow-sm">
                                 <table class="table table-sm table-bordered mb-0 align-middle text-center" style="border-top:2px solid #3577f1;">
                                     <thead class="bg-primary text-white">
                                         <tr>
@@ -190,51 +307,18 @@
                                     </tbody>
                                 </table>
                                 <div class="text-end p-2 border-top bg-white">
-                                    <button type="button" class="btn btn-primary btn-sm"><i class="ri-add-circle-fill me-1"></i>Set Credit</button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Right Panel (Totals) -->
-                        <div class="col-md-5">
-                            <div class="bg-light p-3 rounded mb-3 border">
-                                <h6 class="fw-bold mb-3 text-dark fs-14">Total Payment</h6>
-                                <div class="d-flex justify-content-between align-items-center mb-2 small text-dark">
-                                    <span style="width: 120px;">Amount Due</span>
-                                    <span>:</span>
-                                    <span id="summaryAmountDue" class="text-end flex-grow-1 fw-medium">0.00</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2 small text-dark">
-                                    <span style="width: 120px;">Payment</span>
-                                    <span>:</span>
-                                    <span id="summaryPayment" class="text-end flex-grow-1 fw-medium">0.00</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2 small text-dark">
-                                    <span style="width: 120px;">Credit</span>
-                                    <span>:</span>
-                                    <span id="summaryCredit" class="text-end flex-grow-1 fw-medium">0.00</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2 small text-dark">
-                                    <span style="width: 120px;">Discount</span>
-                                    <span>:</span>
-                                    <span id="summaryDiscount" class="text-end flex-grow-1 fw-medium">0.00</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-3 small text-dark fw-bold fs-13 border-top pt-2">
-                                    <span style="width: 120px;">Total Payment</span>
-                                    <span>:</span>
-                                    <span id="summaryTotalPayment" class="text-end flex-grow-1">0.00</span>
-                                    <input type="hidden" name="total_amount" id="totalToPayInput" value="0">
+                                    <button type="button" class="btn btn-primary btn-sm"><i class="ri-settings-3-line me-1"></i>Set Credit</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Bottom Action Buttons -->
-                    <div class="d-flex justify-content-end align-items-center gap-2 mt-4 border-top pt-3">
-                        <button type="submit" name="action" value="pay_and_new" class="btn btn-info btn-sm"><i class="ri-add-circle-fill me-1"></i>Pay And New</button>
-                        <button type="submit" name="action" value="pay_selected" class="btn btn-success btn-sm"><i class="ri-check-fill me-1"></i>Pay Selected Bill</button>
-                        <button type="submit" name="action" value="save_and_print" class="btn btn-light border btn-sm text-dark"><i class="ri-printer-fill me-1 text-muted"></i>Save And Print</button>
-                        <button type="reset" class="btn btn-warning btn-sm"><i class="ri-refresh-line me-1"></i>Reset</button>
+                    <div class="d-flex justify-content-end align-items-center gap-2 mt-2 border-top pt-3">
+                        <button type="submit" name="action" value="pay_and_new" class="btn btn-info btn-sm"><i class="ri-add-circle-fill me-1"></i>Save & New</button>
+                        <button type="submit" name="action" value="pay_selected" class="btn btn-success btn-sm"><i class="ri-save-line me-1"></i>Save & Close</button>
+                        <button type="submit" name="action" value="save_and_print" class="btn btn-light border btn-sm text-dark"><i class="ri-printer-fill me-1 text-muted"></i>Save & Print</button>
+                        <button type="reset" class="btn btn-warning btn-sm text-white"><i class="ri-refresh-line me-1"></i>Reset</button>
                     </div>
                 </form>
             </div>
@@ -243,35 +327,22 @@
 </div>
 
 <style>
-    /* Dark Theme Refinement based on image_676f5a.jpg */
-    .card { background-color: #1a1d21; border: 1px solid #2d3238; color: #ced4da; }
-    .card-header { background-color: #212529 !important; border-bottom: 1px solid #2d3238; color: #fff; }
-    .form-label { color: #adb5bd; }
-    .form-control, .form-select { background-color: #212529; border: 1px solid #32383e; color: #ced4da; }
-    .form-control:focus, .form-select:focus { background-color: #2b3035; border-color: #3577f1; color: #fff; }
-    .form-control:disabled, .form-select:disabled, .bg-light { background-color: #16191c !important; border-color: #2d3238 !important; color: #8a929a !important; }
+    /* Structure & Layout */
+    .page-title-box h4 { font-weight: 700; }
+    .card { border-radius: 0.25rem; }
     
     /* Table Styling */
-    #billsTable { border-color: #2d3238; }
-    #billsTable thead th { background-color: #4b38b3 !important; color: #fff; border-color: #2d3238; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; }
-    #billsTable tbody td { background-color: #1a1d21; color: #ced4da; border-color: #2d3238; }
-    #billsTable tr:hover td { background-color: #212529; }
+    .table thead th { background-color: #3577f1 !important; color: #fff !important; border-color: #3577f1; font-weight: 500; text-transform: none; font-size: 0.8rem; vertical-align: middle; }
+    .table tbody td { vertical-align: middle; font-size: 0.8rem; }
     
-    /* Credits & Totals Panel */
-    .nav-tabs-custom .nav-link { color: #8a929a; }
-    .nav-tabs-custom .nav-link.active { background-color: transparent; color: #0ab39c; border-bottom-color: #0ab39c; }
-    .bg-light.p-3.rounded { background-color: #212529 !important; border: 1px solid #2d3238 !important; }
-    .text-dark { color: #ced4da !important; }
-    .border-top { border-top: 1px solid #2d3238 !important; }
+    .nav-tabs-custom .nav-link { font-weight: 500; padding: 0.5rem 1rem; }
+    .nav-tabs-custom .nav-link.active { color: #3577f1; border-bottom: 2px solid #3577f1; background: transparent; }
+    
+    .form-label { font-size: 0.75rem; }
+    .form-control-sm, .form-select-sm { font-size: 0.75rem; }
 
-    /* Button Styling from screenshot */
-    .btn-info { background-color: #0dcaf0; border-color: #0dcaf0; color: #fff; }
-    .btn-info:hover { background-color: #0bb5d9; border-color: #0bb5d9; color: #fff; }
-    .btn-success { background-color: #0ab39c; border-color: #0ab39c; }
-    .btn-warning { background-color: #f7b84b; border-color: #f7b84b; color: #fff; }
-    
-    #billsTable th, #billsTable td { padding: 0.25rem 0.5rem !important; font-size: 0.75rem !important; }
-    #billsTable .form-control-sm { padding: 0.1rem 0.3rem !important; font-size: 0.75rem !important; min-height: 26px !important; }
+    /* Fix for dark theme visibility in inputs */
+    .form-control:disabled, .form-control[readonly] { opacity: 0.7; }
 </style>
 @endsection
 
@@ -413,15 +484,14 @@
             items.forEach((item, index) => {
                 const totalAmount = parseFloat(item.total_amount) || 0;
                 const billNo = type === 'Supplier' ? item.grn_no : item.invoice_no;
-                const refNo = type === 'Supplier' ? (item.reference_no || '—') : '—';
                 const idField = type === 'Supplier' ? 'grn_id' : 'invoice_id';
 
                 html += `
                 <tr class="bill-row">
                     <td>${item.date || '—'}</td>
-                    <td>${refNo}</td>
-                    <td>${billNo || '—'}</td>
                     <td class="text-muted">${type === 'Supplier' ? 'Bill' : 'Invoice'}</td>
+                    <td>${billNo || '—'}</td>
+                    <td class="text-end">${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                     <td class="text-end">${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                     <td><input type="text" class="form-control form-control-sm text-end bg-light" readonly value="0.00"></td>
                     <td><input type="text" class="form-control form-control-sm text-end bg-light" readonly value="0.00"></td>
@@ -440,9 +510,7 @@
         function clearTable() {
             billsTableBody.innerHTML = `<tr class="empty-row"><td colspan="8" class="py-4 text-muted small italic bg-light">Select a ${type === 'Supplier' ? 'vendor' : 'customer'} to load outstanding bills.</td></tr>`;
             creditsTableBody.innerHTML = '<tr><td colspan="6" class="py-3 bg-light text-muted small">No credits available</td></tr>';
-            entityBalanceInput.value = '0.00';
             availableCreditSpan.textContent = '0.00';
-            creditCountSpan.textContent = '0';
             cachedCredits = [];
             updateTotals();
         }
@@ -469,9 +537,9 @@
                 totalPay += parseFloat(payInput.value) || 0;
             });
 
-            document.getElementById('summaryAmountDue').textContent = totalDue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('summaryPayment').textContent = totalPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('summaryTotalPayment').textContent = totalPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('summaryAmountDue').value = totalDue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('summaryPayment').value = totalPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('summaryTotalPayment').value = totalPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('headerTotalAmount').textContent = totalPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('totalToPayInput').value = totalPay.toFixed(2);
             lkrTotalAmountInput.value = totalPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
