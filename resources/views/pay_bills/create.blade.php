@@ -18,7 +18,7 @@
 <div class="row">
     <div class="col-lg-12">
         <div class="card">
-            <div class="card-header bg-soft-secondary d-flex justify-content-between align-items-center py-2">
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
                 <h5 class="card-title mb-0"><i class="ri-money-dollar-circle-line me-1"></i>{{ $type }} Bills</h5>
                 <div class="float-end">
                     <button type="submit" form="createPayBillForm" name="action" value="pay_and_new" class="btn btn-info btn-sm me-1"><i class="ri-add-circle-fill me-1"></i>Pay And New</button>
@@ -179,8 +179,8 @@
 
                     <!-- Items Table -->
                     <div class="table-responsive mb-3 border rounded">
-                        <table class="table table-sm table-bordered mb-0 align-middle text-center" id="billsTable" style="border-top:2px solid #3577f1;">
-                            <thead class="bg-primary text-white">
+                        <table class="table table-sm mb-0 align-middle text-center" id="billsTable">
+                            <thead>
                                 <tr>
                                     <th class="fw-bold py-2">Date</th>
                                     <th class="fw-bold py-2">Type</th>
@@ -216,11 +216,20 @@
                             </ul>
                             <div class="tab-content text-muted p-0">
                                 <div class="tab-pane active" id="credits-tab" role="tabpanel">
+<<<<<<< HEAD
                                     <div class="bg-light p-3 rounded d-flex justify-content-between align-items-center mb-3 border">
                                         <div class="flex-grow-1">
                                             <p class="mb-0 text-dark small fw-medium">This {{ $type === 'Supplier' ? 'vendor' : 'customer' }} has credit available <span class="fw-bold ms-5 fs-15 text-primary" id="availableCreditSpan">0.00</span></p>
                                         </div>
                                         <button type="button" id="viewCreditsBtn" class="btn btn-primary btn-sm"><i class="ri-eye-line me-1"></i>View</button>
+=======
+                                    <div class="credit-alert-box d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <p class="mb-2 text-dark small fw-medium">Number of credit available: <span id="creditCount">0</span></p>
+                                            <p class="mb-0 text-dark small fw-medium">This {{ $type === 'Supplier' ? 'vendor' : 'customer' }} has credit available <span class="fw-bold ms-5 fs-15" id="availableCreditSpan">0.00</span></p>
+                                        </div>
+                                        <button type="button" id="viewCreditsBtn" class="btn btn-primary btn-sm"><i class="ri-bank-card-line me-1"></i>View Credits</button>
+>>>>>>> 913b2f98292aa583ed4456f295deaf6aa9fdf31f
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="discount-tab" role="tabpanel">
@@ -285,12 +294,19 @@
                         </div>
                     </div>
 
+<<<<<<< HEAD
                     <!-- Full Width Credits Table (Blue Circled in Image) -->
                     <div class="row mt-2">
                         <div class="col-12">
                             <div class="table-responsive mb-3 border rounded shadow-sm">
                                 <table class="table table-sm table-bordered mb-0 align-middle text-center" style="border-top:2px solid #3577f1;">
                                     <thead class="bg-primary text-white">
+=======
+                            <!-- Credits Table -->
+                            <div class="table-responsive mb-3 border rounded">
+                                <table class="table table-sm mb-0 align-middle text-center">
+                                    <thead>
+>>>>>>> 913b2f98292aa583ed4456f295deaf6aa9fdf31f
                                         <tr>
                                             <th class="fw-bold py-2 small">Date</th>
                                             <th class="fw-bold py-2 small">Transaction No</th>
@@ -307,7 +323,44 @@
                                     </tbody>
                                 </table>
                                 <div class="text-end p-2 border-top bg-white">
+<<<<<<< HEAD
                                     <button type="button" class="btn btn-primary btn-sm"><i class="ri-settings-3-line me-1"></i>Set Credit</button>
+=======
+                                    <button type="button" class="btn btn-primary btn-sm"><i class="ri-add-circle-fill me-1"></i>Set Credit</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Panel (Totals) -->
+                        <div class="col-md-5">
+                            <div class="summary-box mb-3">
+                                <h6 class="fw-bold mb-3 text-dark fs-14">Total Payment</h6>
+                                <div class="d-flex justify-content-between align-items-center mb-2 small text-dark">
+                                    <span style="width: 120px;">Amount Due</span>
+                                    <span>:</span>
+                                    <span id="summaryAmountDue" class="text-end flex-grow-1 fw-medium">0.00</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2 small text-dark">
+                                    <span style="width: 120px;">Payment</span>
+                                    <span>:</span>
+                                    <span id="summaryPayment" class="text-end flex-grow-1 fw-medium">0.00</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2 small text-dark">
+                                    <span style="width: 120px;">Credit</span>
+                                    <span>:</span>
+                                    <span id="summaryCredit" class="text-end flex-grow-1 fw-medium">0.00</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2 small text-dark">
+                                    <span style="width: 120px;">Discount</span>
+                                    <span>:</span>
+                                    <span id="summaryDiscount" class="text-end flex-grow-1 fw-medium">0.00</span>
+                                </div>
+                                <div class="total-row d-flex justify-content-between align-items-center mt-3 small text-dark fw-bold fs-13">
+                                    <span style="width: 120px;">Total Payment</span>
+                                    <span>:</span>
+                                    <span id="summaryTotalPayment" class="text-end flex-grow-1">0.00</span>
+                                    <input type="hidden" name="total_amount" id="totalToPayInput" value="0">
+>>>>>>> 913b2f98292aa583ed4456f295deaf6aa9fdf31f
                                 </div>
                             </div>
                         </div>
@@ -327,6 +380,7 @@
 </div>
 
 <style>
+<<<<<<< HEAD
     /* Structure & Layout */
     .page-title-box h4 { font-weight: 700; }
     .card { border-radius: 0.25rem; }
@@ -343,6 +397,176 @@
 
     /* Fix for dark theme visibility in inputs */
     .form-control:disabled, .form-control[readonly] { opacity: 0.7; }
+=======
+    /* Premium UI Enhancements */
+    :root {
+        --sg-primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        --sg-surface-light: #ffffff;
+        --sg-border-light: #e2e8f0;
+        --sg-text-muted: #64748b;
+    }
+
+    /* Card & Header Styling */
+    .card {
+        border: none !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+        border-radius: 16px !important;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: #f8fafc !important;
+        border-bottom: 1px solid var(--sg-border-light) !important;
+        padding: 1rem 1.25rem !important;
+    }
+
+    .card-title {
+        font-weight: 700 !important;
+        color: #1e293b !important;
+        letter-spacing: -0.02em;
+    }
+
+    /* Form Elements */
+    .form-label {
+        font-weight: 600 !important;
+        color: #475569 !important;
+        font-size: 0.75rem !important;
+        margin-bottom: 0.4rem !important;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.85rem !important;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+    }
+
+    .form-control:read-only, .form-control:disabled {
+        background-color: #f1f5f9 !important;
+        border-color: #e2e8f0 !important;
+        color: #64748b !important;
+    }
+
+    /* Table Styling - Professional Look */
+    .table-responsive {
+        border-radius: 12px !important;
+        overflow: hidden;
+        border: 1px solid #e2e8f0 !important;
+    }
+
+    .table thead th {
+        background-color: #f8fafc !important;
+        color: #475569 !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        font-size: 0.7rem !important;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid #e2e8f0 !important;
+        padding: 0.75rem !important;
+    }
+
+    .table tbody td {
+        padding: 0.75rem !important;
+        vertical-align: middle !important;
+        color: #334155 !important;
+        font-size: 0.85rem !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+    }
+
+    .bill-row:hover td {
+        background-color: #f8fafc !important;
+    }
+
+    /* Summary Panel */
+    .summary-box {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1.25rem;
+    }
+
+    .total-row {
+        background: white;
+        border-radius: 10px;
+        padding: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin-top: 1rem;
+    }
+
+    /* Buttons Modernization */
+    .btn-sm {
+        border-radius: 8px !important;
+        padding: 0.4rem 0.8rem !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .btn-info { background-color: #0ea5e9 !important; border: none !important; }
+    .btn-success { background-color: #10b981 !important; border: none !important; }
+    .btn-warning { background-color: #f59e0b !important; border: none !important; color: white !important; }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Dark Mode Support (using Layout's theme attribute) */
+    [data-bs-theme="dark"] .card { background-color: #1e293b !important; border: 1px solid #334155 !important; }
+    [data-bs-theme="dark"] .card-header { background-color: #0f172a !important; border-bottom: 1px solid #334155 !important; }
+    [data-bs-theme="dark"] .card-title { color: #f1f5f9 !important; }
+    [data-bs-theme="dark"] .form-control, [data-bs-theme="dark"] .form-select {
+        background-color: #0f172a !important;
+        border-color: #334155 !important;
+        color: #f1f5f9 !important;
+    }
+    [data-bs-theme="dark"] .form-control:read-only { background-color: #1e293b !important; color: #94a3b8 !important; }
+    [data-bs-theme="dark"] .table thead th { background-color: #0f172a !important; color: #94a3b8 !important; border-bottom-color: #334155 !important; }
+    [data-bs-theme="dark"] .table tbody td { color: #cbd5e1 !important; border-bottom-color: #334155 !important; }
+    [data-bs-theme="dark"] .summary-box { background: #0f172a !important; border-color: #334155 !important; }
+    [data-bs-theme="dark"] .total-row { background: #1e293b !important; color: white !important; }
+    [data-bs-theme="dark"] .text-dark { color: #f1f5f9 !important; }
+    [data-bs-theme="dark"] .bg-light { background-color: #0f172a !important; color: #94a3b8 !important; }
+
+    /* Additional Refinements */
+    .credit-alert-box {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .credit-alert-box {
+        background: rgba(20, 83, 45, 0.2);
+        border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    .nav-tabs-custom .nav-link {
+        font-weight: 600;
+        border-radius: 8px 8px 0 0;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        color: var(--sg-text-muted);
+    }
+
+    .nav-tabs-custom .nav-link.active {
+        background: white;
+        color: #4f46e5 !important;
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
+    }
+
+    [data-bs-theme="dark"] .nav-tabs-custom .nav-link.active {
+        background: #1e293b;
+        color: #818cf8 !important;
+    }
+>>>>>>> 913b2f98292aa583ed4456f295deaf6aa9fdf31f
 </style>
 @endsection
 
