@@ -41,10 +41,12 @@ Route::prefix('v1')->name('api.')->group(function () {
 
         // ==================== MOBILE ROUTES (For Ref App) ====================
         Route::get('/my-route', [MobileController::class, 'myRoute']);
+        Route::put('/my-route', [MobileController::class, 'updateMyRoute']);
         Route::get('/my-route/customers', [MobileController::class, 'myRouteCustomers']);
         Route::get('/areas', [MobileController::class, 'areas']);
         Route::get('/territories', [MobileController::class, 'territories']);
         Route::get('/routes', [MobileController::class, 'routes']);
+        Route::get('/routes/{id}/customers', [MobileController::class, 'routeCustomers']);
     });
 
 });
