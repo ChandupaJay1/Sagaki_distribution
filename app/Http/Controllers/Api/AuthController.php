@@ -105,7 +105,7 @@ class AuthController extends Controller
                 'message' => 'Validation error',
                 'errors' => $e->errors()
             ], 422);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred during login',
@@ -177,7 +177,7 @@ class AuthController extends Controller
                 'message' => 'Validation error',
                 'errors' => $e->errors()
             ], 422);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred during registration',
