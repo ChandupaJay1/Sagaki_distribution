@@ -93,14 +93,25 @@ class CustomerController extends Controller
             return response()->json(['message' => 'Customer not found'], 404);
         }
 
-        // Fetch Invoices for this customer
+        // Fetch Invoices for this customer that are not fully paid
         $invoices = \App\Models\Invoice::where('customer_id', $id)
+            ->where('status', '!=', 'Paid')
             ->select('id', 'date', 'invoice_no', 'total_amount')
             ->orderBy('date', 'desc')
-            ->get();
+            ->get()
+            ->map(function($invoice) {
+                $paid = \App\Models\PayBillItem::where('invoice_id', $invoice->id)->sum('amount_to_pay');
+                $invoice->total_amount = round($invoice->total_amount - $paid, 2);
+                return $invoice;
+            })
+            ->filter(function($invoice) {
+                return $invoice->total_amount > 0.01;
+            })
+            ->values();
 
         // Fetch Sales Returns (Credits) for this customer
         $credits = \App\Models\SalesReturn::where('customer_id', $id)
+            ->where('total_amount', '>', 0.01) // Only show credits with balance
             ->select('id', 'date', 'return_no', 'total_amount')
             ->orderBy('date', 'desc')
             ->get();

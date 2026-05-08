@@ -182,6 +182,7 @@
                         <table class="table table-sm mb-0 align-middle text-center" id="billsTable">
                             <thead>
                                 <tr>
+                                    <th class="fw-bold py-2" style="width: 40px;"><input type="checkbox" class="form-check-input" id="selectAllBills"></th>
                                     <th class="fw-bold py-2">Date</th>
                                     <th class="fw-bold py-2">Type</th>
                                     <th class="fw-bold py-2">Number</th>
@@ -194,7 +195,7 @@
                             </thead>
                             <tbody id="billsTableBody">
                                 <tr class="empty-row">
-                                    <td colspan="8" class="py-4 text-muted small italic bg-light">Select a {{ $type === 'Supplier' ? 'vendor' : 'customer' }} to load outstanding bills.</td>
+                                    <td colspan="9" class="py-4 text-muted small italic bg-light">Select a {{ $type === 'Supplier' ? 'vendor' : 'customer' }} to load outstanding bills.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -243,7 +244,7 @@
                                 <h6 class="fw-bold mb-3 text-dark fs-14">Amount for Select Invoice</h6>
                                 <div class="row g-2 align-items-center mb-2">
                                     <div class="col-4">
-                                        <label class="form-label small mb-0">Amount Due</label>
+                                        <label class="form-label small mb-0">Total Due</label>
                                     </div>
                                     <div class="col-8">
                                         <input type="text" id="summaryAmountDue" class="form-control form-control-sm text-end bg-light fw-bold" readonly value="0.00">
@@ -251,18 +252,18 @@
                                 </div>
                                 <div class="row g-2 align-items-center mb-2">
                                     <div class="col-4">
-                                        <label class="form-label small mb-0">Applied</label>
+                                        <label class="form-label small mb-0">Applied Credit</label>
                                     </div>
                                     <div class="col-8">
-                                        <input type="text" id="summaryPayment" class="form-control form-control-sm text-end bg-light fw-bold text-success" readonly value="0.00">
+                                        <input type="text" id="summaryCredit" class="form-control form-control-sm text-end bg-light fw-bold text-info" readonly value="0.00">
                                     </div>
                                 </div>
                                 <div class="row g-2 align-items-center mb-2">
                                     <div class="col-4">
-                                        <label class="form-label small mb-0">Over payment amount</label>
+                                        <label class="form-label small mb-0">Cash Payment</label>
                                     </div>
                                     <div class="col-8">
-                                        <input type="text" id="summaryCredit" class="form-control form-control-sm text-end bg-light fw-bold text-info" readonly value="0.00">
+                                        <input type="text" id="summaryPayment" class="form-control form-control-sm text-end bg-light fw-bold text-success" readonly value="0.00">
                                     </div>
                                 </div>
                                 <div class="row g-2 align-items-center mb-0 border-top pt-2 mt-2">
@@ -293,6 +294,7 @@
                                 <table class="table table-sm table-bordered mb-0 align-middle text-center" style="border-top:2px solid #3577f1;">
                                     <thead class="bg-primary text-white">
                                         <tr>
+                                            <th class="fw-bold py-2 small" style="width: 40px;"><input type="checkbox" class="form-check-input" id="selectAllCredits"></th>
                                             <th class="fw-bold py-2 small">Date</th>
                                             <th class="fw-bold py-2 small">Transaction No</th>
                                             <th class="fw-bold py-2 small">Type</th>
@@ -303,10 +305,14 @@
                                     </thead>
                                     <tbody id="creditsTableBody">
                                         <tr>
-                                            <td colspan="6" class="py-3 bg-light text-muted small">No credits available</td>
+                                            <td colspan="7" class="py-3 bg-light text-muted small">No credits available</td>
                                         </tr>
                                     </tbody>
                                 </table>
+                                <div id="appliedCreditsSummary" class="p-2 bg-light border-top d-none">
+                                    <span class="small text-muted"><i class="ri-checkbox-circle-line text-success me-1"></i> <span id="appliedCreditsCount">0</span> credits applied.</span>
+                                    <button type="button" class="btn btn-link btn-sm p-0 ms-2 text-decoration-none" id="clearCreditsBtn">Clear All</button>
+                                </div>
                                 <div class="text-end p-2 border-top bg-white">
                                     <button type="button" class="btn btn-primary btn-sm"><i class="ri-settings-3-line me-1"></i>Set Credit</button>
                                 </div>
@@ -506,6 +512,7 @@
         const entitySelectWrapper = document.getElementById(type === 'Supplier' ? 'vendorSelect' : 'customerSelect');
         const billsTableBody = document.getElementById('billsTableBody');
         const entityBalanceInput = document.getElementById('entityBalance');
+        const displayAmountInput = document.getElementById('displayAmount');
         const lkrTotalAmountInput = document.getElementById('lkrTotalAmount');
         const paymentMethodSelect = document.getElementById('paymentMethod');
         const chequeNoInput = document.getElementById('chequeNo');
@@ -514,8 +521,19 @@
         const creditCountSpan = document.getElementById('creditCount');
         const creditsTableBody = document.getElementById('creditsTableBody');
         const viewCreditsBtn = document.getElementById('viewCreditsBtn');
+        const appliedCreditsSummary = document.getElementById('appliedCreditsSummary');
+        const appliedCreditsCount = document.getElementById('appliedCreditsCount');
+        const clearCreditsBtn = document.getElementById('clearCreditsBtn');
 
         let cachedCredits = [];
+
+        // Handle Clear Credits
+        clearCreditsBtn.addEventListener('click', function() {
+            document.querySelectorAll('.credit-checkbox').forEach(cb => {
+                cb.checked = false;
+            });
+            updateTotals();
+        });
 
         // Handle Entity selection
         const initEntitySelect = () => {
@@ -536,6 +554,11 @@
             creditsTableBody.closest('.table-responsive').scrollIntoView({ behavior: 'smooth' });
         });
 
+        // Handle main Amount input
+        displayAmountInput.addEventListener('input', function() {
+            updateTotals();
+        });
+
         // Handle Payment Method change
         paymentMethodSelect.addEventListener('change', function() {
             if (this.value === 'Cheque') {
@@ -553,6 +576,8 @@
         document.getElementById('createPayBillForm').addEventListener('submit', function(e) {
             const entityId = entitySelectWrapper.value;
             const totalPay = parseFloat(document.getElementById('totalToPayInput').value) || 0;
+            const totalCreditUsed = Array.from(document.querySelectorAll('.cr-in-use-input'))
+                                        .reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0);
 
             if (!entityId) {
                 e.preventDefault();
@@ -560,9 +585,9 @@
                 return false;
             }
 
-            if (totalPay <= 0) {
+            if (totalPay <= 0 && totalCreditUsed <= 0) {
                 e.preventDefault();
-                alert('Total payment amount must be greater than zero.');
+                alert('Please enter a payment amount or select a credit to use.');
                 return false;
             }
         });
@@ -573,7 +598,7 @@
                 return;
             }
 
-            billsTableBody.innerHTML = '<tr><td colspan="8" class="py-4 text-center bg-light"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Loading...</td></tr>';
+            billsTableBody.innerHTML = '<tr><td colspan="9" class="py-4 text-center bg-light"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Loading...</td></tr>';
 
             const endpoint = type === 'Supplier' 
                 ? `/api/vendors/${entityId}/outstanding-bills` 
@@ -593,43 +618,55 @@
                     let totalCredit = cachedCredits.reduce((sum, c) => sum + parseFloat(c.total_amount), 0);
                     availableCreditSpan.textContent = totalCredit.toLocaleString(undefined, {minimumFractionDigits: 2});
                     creditCountSpan.textContent = cachedCredits.length;
+                    
+                    // Automatically render credits so they appear in the table immediately
+                    renderCredits(cachedCredits);
 
                     if (items && items.length > 0) {
                         renderBills(items);
                     } else {
-                        billsTableBody.innerHTML = `<tr><td colspan="8" class="py-4 text-muted bg-light">No outstanding ${type === 'Supplier' ? 'bills' : 'invoices'} found.</td></tr>`;
+                        billsTableBody.innerHTML = `<tr><td colspan="9" class="py-4 text-muted bg-light">No outstanding ${type === 'Supplier' ? 'bills' : 'invoices'} found.</td></tr>`;
                         updateTotals();
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    billsTableBody.innerHTML = '<tr><td colspan="8" class="py-4 text-danger bg-light">Error loading data. Please try again.</td></tr>';
+                    billsTableBody.innerHTML = '<tr><td colspan="9" class="py-4 text-danger bg-light">Error loading data. Please try again.</td></tr>';
                 });
         }
 
         function renderCredits(credits) {
             if (!credits || credits.length === 0) {
-                creditsTableBody.innerHTML = '<tr><td colspan="6" class="py-3 bg-light text-muted small">No credits available</td></tr>';
+                creditsTableBody.innerHTML = '<tr><td colspan="7" class="py-3 bg-light text-muted small">No credits available</td></tr>';
                 return;
             }
 
             let html = '';
             credits.forEach((credit, index) => {
                 const amount = parseFloat(credit.total_amount) || 0;
+                const isAdvance = credit.return_no && credit.return_no.startsWith('ADV-');
+                const typeLabel = isAdvance ? 'Previous Advance' : 'Return';
+
                 html += `
-                <tr>
+                <tr class="credit-row">
+                    <td>
+                        <input type="checkbox" class="form-check-input credit-checkbox" data-amount="${amount}">
+                        <input type="hidden" name="used_credits[${index}][id]" value="${credit.id}">
+                        <input type="hidden" name="used_credits[${index}][amount]" class="credit-amount-used-hidden" value="0.00">
+                    </td>
                     <td class="small">${credit.date || '—'}</td>
                     <td class="small text-primary fw-medium">${credit.return_no || '—'}</td>
-                    <td class="small">Return</td>
+                    <td class="small">${typeLabel}</td>
                     <td class="text-end small">${amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                     <td class="text-end small">${amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                     <td>
                         <input type="number" class="form-control form-control-sm text-end credit-use-input" 
-                               step="any" min="0" max="${amount}" placeholder="0.00">
+                               step="any" min="0" max="${amount}" data-available="${amount}" placeholder="0.00" readonly>
                     </td>
                 </tr>`;
             });
             creditsTableBody.innerHTML = html;
+            initCreditEvents();
         }
 
         function renderBills(items) {
@@ -641,15 +678,17 @@
 
                 html += `
                 <tr class="bill-row">
+                    <td><input type="checkbox" class="form-check-input bill-checkbox" data-due="${totalAmount}"></td>
                     <td>${item.date || '—'}</td>
                     <td class="text-muted">${type === 'Supplier' ? 'Bill' : 'Invoice'}</td>
                     <td>${billNo || '—'}</td>
-                    <td class="text-end">${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                    <td class="text-end">${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                    <td><input type="text" class="form-control form-control-sm text-end bg-light" readonly value="0.00"></td>
+                    <td class="text-end orig-amt-cell">${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    <td class="text-end amt-due-cell">${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    <td><input type="text" class="form-control form-control-sm text-end bg-light cr-in-use-input" readonly value="0.00"></td>
                     <td><input type="text" class="form-control form-control-sm text-end bg-light" readonly value="0.00"></td>
                     <td>
                         <input type="hidden" name="items[${index}][${idField}]" value="${item.id}">
+                        <input type="hidden" name="items[${index}][credit_used]" class="credit-used-hidden" value="0.00">
                         <input type="number" name="items[${index}][amount_to_pay]" class="form-control form-control-sm text-end pay-input" 
                                step="any" min="0" max="${totalAmount}" data-due="${totalAmount}" placeholder="0.00">
                     </td>
@@ -661,41 +700,253 @@
         }
 
         function clearTable() {
-            billsTableBody.innerHTML = `<tr class="empty-row"><td colspan="8" class="py-4 text-muted small italic bg-light">Select a ${type === 'Supplier' ? 'vendor' : 'customer'} to load outstanding bills.</td></tr>`;
-            creditsTableBody.innerHTML = '<tr><td colspan="6" class="py-3 bg-light text-muted small">No credits available</td></tr>';
+            billsTableBody.innerHTML = `<tr class="empty-row"><td colspan="9" class="py-4 text-muted small italic bg-light">Select a ${type === 'Supplier' ? 'vendor' : 'customer'} to load outstanding bills.</td></tr>`;
+            creditsTableBody.innerHTML = '<tr><td colspan="7" class="py-3 bg-light text-muted small">No credits available</td></tr>';
             availableCreditSpan.textContent = '0.00';
             cachedCredits = [];
             updateTotals();
         }
 
         function initTableEvents() {
+            const selectAllBills = document.getElementById('selectAllBills');
+            
+            selectAllBills.checked = false;
+            selectAllBills.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.bill-checkbox');
+                checkboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                });
+                updateTotals();
+            });
+
+            document.querySelectorAll('.bill-checkbox').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    updateTotals();
+                    
+                    // Update Select All state
+                    const allChecked = document.querySelectorAll('.bill-checkbox:checked').length === document.querySelectorAll('.bill-checkbox').length;
+                    selectAllBills.checked = allChecked;
+                });
+            });
+
             document.querySelectorAll('.pay-input').forEach(input => {
-                input.addEventListener('input', updateTotals);
+                input.addEventListener('input', function() {
+                    updateTotals(true);
+                });
                 
                 // Allow double click to set full amount
                 input.addEventListener('dblclick', function() {
                     this.value = this.dataset.due;
+                    const row = this.closest('tr');
+                    const cb = row.querySelector('.bill-checkbox');
+                    cb.checked = true;
                     updateTotals();
                 });
             });
         }
 
-        function updateTotals() {
-            let totalDue = 0;
-            let totalPay = 0;
-
-            document.querySelectorAll('.bill-row').forEach(row => {
-                const payInput = row.querySelector('.pay-input');
-                totalDue += parseFloat(payInput.dataset.due) || 0;
-                totalPay += parseFloat(payInput.value) || 0;
+        function initCreditEvents() {
+            const selectAllCredits = document.getElementById('selectAllCredits');
+            
+            selectAllCredits.checked = false;
+            selectAllCredits.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.credit-checkbox');
+                checkboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                });
+                updateTotals();
             });
 
-            document.getElementById('summaryAmountDue').value = totalDue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('summaryPayment').value = totalPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('summaryTotalPayment').value = totalPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('headerTotalAmount').textContent = totalPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('totalToPayInput').value = totalPay.toFixed(2);
-            lkrTotalAmountInput.value = totalPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.querySelectorAll('.credit-checkbox').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    updateTotals();
+                    
+                    // Update Select All state
+                    const allChecked = document.querySelectorAll('.credit-checkbox:checked').length === document.querySelectorAll('.credit-checkbox').length;
+                    selectAllCredits.checked = allChecked;
+                });
+            });
+
+            document.querySelectorAll('.credit-use-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    const row = this.closest('tr');
+                    const cb = row.querySelector('.credit-checkbox');
+                    const val = parseFloat(this.value) || 0;
+                    
+                    cb.checked = val > 0;
+                    updateTotals();
+                });
+            });
+        }
+
+        function updateTotals(isUserAction = false) {
+            let totalOrigDue = 0;
+            let totalCashApplied = 0;
+            let totalCreditApplied = 0;
+            let selectedCreditsCount = 0;
+            
+            // 1. Calculate Available Credit from selected Previous Credits
+            let totalSelectedCreditBalance = 0;
+            document.querySelectorAll('.credit-row').forEach(row => {
+                const cb = row.querySelector('.credit-checkbox');
+                const useInput = row.querySelector('.credit-use-input');
+                const amountUsedHidden = row.querySelector('.credit-amount-used-hidden');
+                const available = parseFloat(useInput.dataset.available) || 0;
+
+                if (cb.checked) {
+                    totalSelectedCreditBalance += available;
+                    selectedCreditsCount++;
+                    row.classList.add('d-none');
+                } else {
+                    useInput.value = '0.00';
+                    if (amountUsedHidden) amountUsedHidden.value = '0.00';
+                    row.classList.remove('d-none');
+                }
+            });
+            
+            let remainingCreditToAllocate = totalSelectedCreditBalance;
+
+            // Update Applied Credits Summary UI
+            if (selectedCreditsCount > 0) {
+                appliedCreditsSummary.classList.remove('d-none');
+                appliedCreditsCount.textContent = selectedCreditsCount;
+            } else {
+                appliedCreditsSummary.classList.add('d-none');
+            }
+
+            // 2. Determine Cash Funds available from main input
+            const rawAmount = displayAmountInput.value.replace(/,/g, '');
+            let totalCashFunds = parseFloat(rawAmount) || 0;
+            let remainingCashToAllocate = totalCashFunds;
+
+            // 3. Sequential allocation to checked bills
+            document.querySelectorAll('.bill-row').forEach(row => {
+                const cb = row.querySelector('.bill-checkbox');
+                const payInput = row.querySelector('.pay-input'); // This is the CASH payment field
+                const crInUseInput = row.querySelector('.cr-in-use-input'); // This is the CREDIT use field
+                const amtDueCell = row.querySelector('.amt-due-cell');
+                const origAmt = parseFloat(payInput.dataset.due) || 0;
+                
+                if (cb.checked) {
+                    totalOrigDue += origAmt;
+
+                    // A. Allocate Credit First
+                    let creditAllocated = Math.min(origAmt, remainingCreditToAllocate);
+                    crInUseInput.value = creditAllocated.toFixed(2);
+                    
+                    const creditHidden = row.querySelector('.credit-used-hidden');
+                    if (creditHidden) creditHidden.value = creditAllocated.toFixed(2);
+
+                    remainingCreditToAllocate -= creditAllocated;
+                    totalCreditApplied += creditAllocated;
+
+                    // B. Allocate Cash for the remaining balance
+                    let remainingBalanceAfterCredit = origAmt - creditAllocated;
+                    
+                    let cashAllocated = 0;
+                    if (totalCashFunds > 0) {
+                        cashAllocated = Math.min(remainingBalanceAfterCredit, remainingCashToAllocate);
+                        remainingCashToAllocate -= cashAllocated;
+                    } else if (isUserAction) {
+                        // If user typed directly into the cash payInput, use that value but cap it
+                        cashAllocated = parseFloat(payInput.value) || 0;
+                        if (cashAllocated > remainingBalanceAfterCredit) cashAllocated = remainingBalanceAfterCredit;
+                    }
+
+                    payInput.value = cashAllocated.toFixed(2);
+                    totalCashApplied += cashAllocated;
+
+                    // C. Update Amt. Due cell (Orig. Amt - Credit - Cash)
+                    let finalAmtDue = origAmt - creditAllocated - cashAllocated;
+                    amtDueCell.textContent = finalAmtDue.toLocaleString(undefined, {minimumFractionDigits: 2});
+                    
+                    if (finalAmtDue <= 0.01) {
+                        amtDueCell.classList.add('text-success', 'fw-bold');
+                    } else {
+                        amtDueCell.classList.remove('text-success', 'fw-bold');
+                    }
+                } else {
+                    payInput.value = '0.00';
+                    crInUseInput.value = '0.00';
+                    amtDueCell.textContent = origAmt.toLocaleString(undefined, {minimumFractionDigits: 2});
+                    amtDueCell.classList.remove('text-success', 'fw-bold');
+                    const creditHidden = row.querySelector('.credit-used-hidden');
+                    if (creditHidden) creditHidden.value = '0.00';
+                }
+            });
+
+            // 4. Update the main Cash Amount input if it was empty but we allocated cash
+            if (totalCashFunds === 0 && totalCashApplied > 0) {
+                displayAmountInput.value = totalCashApplied.toLocaleString(undefined, {minimumFractionDigits: 2});
+                totalCashFunds = totalCashApplied;
+                remainingCashToAllocate = 0;
+            }
+
+            // 5. Update Credit Record usages (Finalizing how much of each selected credit record was actually consumed)
+            let totalCreditConsumedAcrossAllBills = totalCreditApplied;
+            document.querySelectorAll('.credit-row').forEach(row => {
+                const cb = row.querySelector('.credit-checkbox');
+                if (cb.checked) {
+                    const useInput = row.querySelector('.credit-use-input');
+                    const amountUsedHidden = row.querySelector('.credit-amount-used-hidden');
+                    const available = parseFloat(useInput.dataset.available) || 0;
+                    
+                    let consumedFromThisRecord = Math.min(available, totalCreditConsumedAcrossAllBills);
+                    useInput.value = consumedFromThisRecord.toFixed(2);
+                    if (amountUsedHidden) amountUsedHidden.value = consumedFromThisRecord.toFixed(2);
+                    
+                    totalCreditConsumedAcrossAllBills -= consumedFromThisRecord;
+                }
+            });
+
+            // 6. Handle Overpayment (Leftover Cash + Leftover Credit)
+            const overPaymentAmount = remainingCashToAllocate + remainingCreditToAllocate;
+            updateOverpaymentRow(overPaymentAmount);
+
+            // 7. Summary Box Updates
+            document.getElementById('summaryAmountDue').value = totalOrigDue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('summaryCredit').value = totalCreditApplied.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('summaryPayment').value = totalCashApplied.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            const summaryTotalPayment = totalCashFunds + totalSelectedCreditBalance;
+            document.getElementById('summaryTotalPayment').value = summaryTotalPayment.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('headerTotalAmount').textContent = totalCashFunds.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('totalToPayInput').value = totalCashFunds.toFixed(2);
+            lkrTotalAmountInput.value = totalCashFunds.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        function updateOverpaymentRow(amount) {
+            let existingRow = document.getElementById('overpayment-row');
+            
+            if (amount <= 0.01) {
+                if (existingRow) existingRow.remove();
+                if (creditsTableBody.querySelectorAll('tr.credit-row, tr#overpayment-row').length === 0) {
+                    creditsTableBody.innerHTML = '<tr><td colspan="7" class="py-3 bg-light text-muted small">No credits available</td></tr>';
+                }
+                return;
+            }
+
+            const date = new Date().toISOString().split('T')[0];
+            const html = `
+                <tr id="overpayment-row" class="bg-warning-subtle border-warning">
+                    <td><input type="checkbox" class="form-check-input" checked disabled></td>
+                    <td class="small">${date}</td>
+                    <td class="small text-danger fw-bold">CURRENT OVERPAYMENT</td>
+                    <td class="small">Will be saved as credit</td>
+                    <td class="text-end small fw-bold">${amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    <td class="text-end small fw-bold">${amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm text-end bg-light fw-bold" readonly value="${amount.toFixed(2)}">
+                    </td>
+                </tr>`;
+
+            if (existingRow) {
+                existingRow.outerHTML = html;
+            } else {
+                const emptyRow = creditsTableBody.querySelector('td[colspan="7"]')?.closest('tr');
+                if (emptyRow) emptyRow.remove();
+                creditsTableBody.insertAdjacentHTML('afterbegin', html);
+            }
         }
     });
 </script>

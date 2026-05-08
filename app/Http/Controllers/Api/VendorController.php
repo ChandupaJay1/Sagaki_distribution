@@ -93,14 +93,25 @@ class VendorController extends Controller
             return response()->json(['message' => 'Vendor not found'], 404);
         }
 
-        // Fetch GRNs (Bills) for this vendor
+        // Fetch GRNs (Bills) for this vendor that are not fully paid
         $bills = \App\Models\Grn::where('vendor_id', $id)
+            ->where('status', '!=', 'Paid')
             ->select('id', 'date', 'due_date', 'reference_no', 'grn_no', 'total_amount')
             ->orderBy('date', 'desc')
-            ->get();
+            ->get()
+            ->map(function($bill) {
+                $paid = \App\Models\PayBillItem::where('grn_id', $bill->id)->sum('amount_to_pay');
+                $bill->total_amount = round($bill->total_amount - $paid, 2);
+                return $bill;
+            })
+            ->filter(function($bill) {
+                return $bill->total_amount > 0.01;
+            })
+            ->values();
 
         // Fetch GRN Returns (Credits) for this vendor
         $credits = \App\Models\GrnReturn::where('vendor_id', $id)
+            ->where('total_amount', '>', 0.01) // Only show credits with balance
             ->select('id', 'date', 'return_no', 'total_amount')
             ->orderBy('date', 'desc')
             ->get();
