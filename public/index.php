@@ -1,5 +1,9 @@
 <?php
 
+if (!function_exists('mb_split')) {
+    require_once __DIR__ . '/../vendor/symfony/polyfill-mbstring/bootstrap.php';
+}
+
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
