@@ -9,33 +9,6 @@ define('LARAVEL_START', microtime(true));
 // Register the Composer autoloader...
 require __DIR__.'/vendor/autoload.php';
 
-if (!extension_loaded('pdo_mysql') && file_exists(__DIR__.'/php.ini')) {
-    putenv("PHPRC=" . __DIR__);
-    $args = $_SERVER['argv'];
-    
-    // If the command is 'serve', handle it specially to ensure the server uses the ini
-    if (isset($args[1]) && $args[1] === 'serve') {
-        $port = 8000;
-        foreach ($args as $arg) {
-            if (strpos($arg, '--port=') === 0) {
-                $port = substr($arg, 7);
-            }
-        }
-        echo "Starting Laravel development server: http://127.0.0.1:$port\n";
-        passthru(escapeshellarg(PHP_BINARY) . " -c " . escapeshellarg(__DIR__.'/php.ini') . " -S 127.0.0.1:$port -t public", $exitCode);
-        exit($exitCode);
-    }
-
-    $php = PHP_BINARY;
-    $cmd = escapeshellarg($php) . " " . escapeshellarg(__FILE__);
-    for ($i = 1; $i < count($args); $i++) {
-        $cmd .= " " . escapeshellarg($args[$i]);
-    }
-    
-    passthru($cmd, $exitCode);
-    exit($exitCode);
-}
-
 // Bootstrap Laravel and handle the command...
 /** @var Application $app */
 $app = require_once __DIR__.'/bootstrap/app.php';
