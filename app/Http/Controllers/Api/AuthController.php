@@ -76,6 +76,24 @@ class AuthController extends Controller
             // Create new token
             $token = $user->createToken('auth_token')->plainTextToken;
 
+            // Get route information
+            $routeInfo = null;
+            if ($user->route_id) {
+                $route = \App\Models\Route::with(['areaRef', 'territory'])->find($user->route_id);
+                if ($route) {
+                    $routeInfo = [
+                        'id' => $route->id,
+                        'name' => $route->name,
+                        'code' => $route->code,
+                        'area' => $route->areaRef ? $route->areaRef->name : null,
+                        'area_id' => $route->area_id,
+                        'territory' => $route->territory ? $route->territory->name : null,
+                        'territory_id' => $route->territory_id,
+                        'description' => $route->description,
+                    ];
+                }
+            }
+
             // Return success response
             return response()->json([
                 'success' => true,
@@ -87,6 +105,8 @@ class AuthController extends Controller
                     'email' => $user->email,
                     'mobile_number' => $user->mobile_number,
                     'role' => $user->role,
+                    'route_id' => $user->route_id,
+                    'route' => $routeInfo,
                     'serial_number' => $user->serial_number,
                     'serial_expires_at' => $user->serial_expires_at,
                     'is_active' => $user->is_active,
@@ -124,6 +144,7 @@ class AuthController extends Controller
                 'mobile_number' => 'required|string|unique:users',
                 'password' => 'required|string|min:8|confirmed',
                 'role' => 'nullable|string|in:ref', // Only 'ref' can register through API
+                'route_id' => 'nullable|exists:routes,id',
             ]);
 
             // Generate serial number
@@ -138,10 +159,11 @@ class AuthController extends Controller
                 'email' => $validated['email'],
                 'mobile_number' => $validated['mobile_number'],
                 'password' => Hash::make($validated['password']),
-                'role' => 'ref', // Force 'ref' role regardless of input
+                'role' => $validated['role'] ?? 'ref',
+                'route_id' => $validated['route_id'] ?? null,
                 'serial_number' => $serialNumber,
                 'serial_expires_at' => $serialExpiresAt,
-                'is_active' => true,
+                'is_active' => true, // Auto-activate for now, or set to false if admin approval needed
             ]);
 
             // Create token
@@ -420,9 +442,28 @@ class AuthController extends Controller
                 'name' => 'sometimes|required|string|max:255',
                 'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
                 'mobile_number' => 'sometimes|required|string|unique:users,mobile_number,' . $user->id,
+                'route_id' => 'sometimes|nullable|exists:routes,id',
             ]);
 
             $user->update($validated);
+
+            // Get updated route info
+            $routeInfo = null;
+            if ($user->route_id) {
+                $route = \App\Models\Route::with(['areaRef', 'territory'])->find($user->route_id);
+                if ($route) {
+                    $routeInfo = [
+                        'id' => $route->id,
+                        'name' => $route->name,
+                        'code' => $route->code,
+                        'area' => $route->areaRef ? $route->areaRef->name : null,
+                        'area_id' => $route->area_id,
+                        'territory' => $route->territory ? $route->territory->name : null,
+                        'territory_id' => $route->territory_id,
+                        'description' => $route->description,
+                    ];
+                }
+            }
 
             return response()->json([
                 'success' => true,
@@ -434,6 +475,8 @@ class AuthController extends Controller
                         'email' => $user->email,
                         'mobile_number' => $user->mobile_number,
                         'role' => $user->role,
+                        'route_id' => $user->route_id,
+                        'route' => $routeInfo,
                     ]
                 ]
             ], 200);
