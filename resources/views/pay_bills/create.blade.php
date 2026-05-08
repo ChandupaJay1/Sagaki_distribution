@@ -216,20 +216,12 @@
                             </ul>
                             <div class="tab-content text-muted p-0">
                                 <div class="tab-pane active" id="credits-tab" role="tabpanel">
-<<<<<<< HEAD
-                                    <div class="bg-light p-3 rounded d-flex justify-content-between align-items-center mb-3 border">
-                                        <div class="flex-grow-1">
-                                            <p class="mb-0 text-dark small fw-medium">This {{ $type === 'Supplier' ? 'vendor' : 'customer' }} has credit available <span class="fw-bold ms-5 fs-15 text-primary" id="availableCreditSpan">0.00</span></p>
-                                        </div>
-                                        <button type="button" id="viewCreditsBtn" class="btn btn-primary btn-sm"><i class="ri-eye-line me-1"></i>View</button>
-=======
                                     <div class="credit-alert-box d-flex justify-content-between align-items-center mb-3">
                                         <div>
                                             <p class="mb-2 text-dark small fw-medium">Number of credit available: <span id="creditCount">0</span></p>
                                             <p class="mb-0 text-dark small fw-medium">This {{ $type === 'Supplier' ? 'vendor' : 'customer' }} has credit available <span class="fw-bold ms-5 fs-15" id="availableCreditSpan">0.00</span></p>
                                         </div>
                                         <button type="button" id="viewCreditsBtn" class="btn btn-primary btn-sm"><i class="ri-bank-card-line me-1"></i>View Credits</button>
->>>>>>> 913b2f98292aa583ed4456f295deaf6aa9fdf31f
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="discount-tab" role="tabpanel">
@@ -336,24 +328,6 @@
 </div>
 
 <style>
-<<<<<<< HEAD
-    /* Structure & Layout */
-    .page-title-box h4 { font-weight: 700; }
-    .card { border-radius: 0.25rem; }
-    
-    /* Table Styling */
-    .table thead th { background-color: #3577f1 !important; color: #fff !important; border-color: #3577f1; font-weight: 500; text-transform: none; font-size: 0.8rem; vertical-align: middle; }
-    .table tbody td { vertical-align: middle; font-size: 0.8rem; }
-    
-    .nav-tabs-custom .nav-link { font-weight: 500; padding: 0.5rem 1rem; }
-    .nav-tabs-custom .nav-link.active { color: #3577f1; border-bottom: 2px solid #3577f1; background: transparent; }
-    
-    .form-label { font-size: 0.75rem; }
-    .form-control-sm, .form-select-sm { font-size: 0.75rem; }
-
-    /* Fix for dark theme visibility in inputs */
-    .form-control:disabled, .form-control[readonly] { opacity: 0.7; }
-=======
     /* Premium UI Enhancements */
     :root {
         --sg-primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
@@ -522,7 +496,6 @@
         background: #1e293b;
         color: #818cf8 !important;
     }
->>>>>>> 913b2f98292aa583ed4456f295deaf6aa9fdf31f
 </style>
 @endsection
 
