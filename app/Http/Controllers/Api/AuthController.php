@@ -76,6 +76,18 @@ class AuthController extends Controller
             // Create new token
             $token = $user->createToken('auth_token')->plainTextToken;
 
+            // Get route information
+            $routeInfo = null;
+            if ($user->route_id) {
+                $route = \App\Models\Route::find($user->route_id);
+                if ($route) {
+                    $routeInfo = [
+                        'id' => $route->id,
+                        'name' => $route->name,
+                    ];
+                }
+            }
+
             // Return success response
             return response()->json([
                 'success' => true,
@@ -87,6 +99,8 @@ class AuthController extends Controller
                     'email' => $user->email,
                     'mobile_number' => $user->mobile_number,
                     'role' => $user->role,
+                    'route_id' => $user->route_id,
+                    'route' => $routeInfo,
                     'serial_number' => $user->serial_number,
                     'serial_expires_at' => $user->serial_expires_at,
                     'is_active' => $user->is_active,
