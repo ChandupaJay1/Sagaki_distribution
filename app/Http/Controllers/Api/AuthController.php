@@ -38,6 +38,14 @@ class AuthController extends Controller
                 ], 401);
             }
 
+            // CRITICAL: Block anyone who is NOT a representative (ref)
+            if ($user->role !== 'ref') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access denied. This app is for representatives only. Admins cannot login here.'
+                ], 403);
+            }
+
             // Check password
             if (!Hash::check($validated['password'], $user->password)) {
                 return response()->json([
@@ -115,7 +123,7 @@ class AuthController extends Controller
                 'email' => 'required|string|email|max:255|unique:users',
                 'mobile_number' => 'required|string|unique:users',
                 'password' => 'required|string|min:8|confirmed',
-                'role' => 'nullable|string|in:admin,user,manager,ref',
+                'role' => 'nullable|string|in:ref', // Only 'ref' can register through API
             ]);
 
             // Generate serial number
@@ -130,7 +138,7 @@ class AuthController extends Controller
                 'email' => $validated['email'],
                 'mobile_number' => $validated['mobile_number'],
                 'password' => Hash::make($validated['password']),
-                'role' => $validated['role'] ?? 'user',
+                'role' => 'ref', // Force 'ref' role regardless of input
                 'serial_number' => $serialNumber,
                 'serial_expires_at' => $serialExpiresAt,
                 'is_active' => true,
