@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
+use App\Models\Route;
 use Carbon\Carbon;
 
 class AuthController extends Controller
@@ -38,14 +39,6 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            // CRITICAL: Block anyone who is NOT a representative (ref)
-            if ($user->role !== 'ref') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Access denied. This app is for representatives only. Admins cannot login here.'
-                ], 403);
-            }
-
             // Check password
             if (!Hash::check($validated['password'], $user->password)) {
                 return response()->json([
@@ -62,36 +55,29 @@ class AuthController extends Controller
                 ], 403);
             }
 
-            // Check if serial number is expired
-            if ($user->serial_expires_at && Carbon::parse($user->serial_expires_at)->isPast()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Your serial number has expired. Please contact administrator.'
-                ], 403);
-            }
-
-            // Optionally delete old tokens (single device login)
-            // $user->tokens()->delete();
-
             // Create new token
             $token = $user->createToken('auth_token')->plainTextToken;
 
             // Get route information
             $routeInfo = null;
-            if ($user->route_id) {
-                $route = \App\Models\Route::with(['areaRef', 'territory'])->find($user->route_id);
-                if ($route) {
-                    $routeInfo = [
-                        'id' => $route->id,
-                        'name' => $route->name,
-                        'code' => $route->code,
-                        'area' => $route->areaRef ? $route->areaRef->name : null,
-                        'area_id' => $route->area_id,
-                        'territory' => $route->territory ? $route->territory->name : null,
-                        'territory_id' => $route->territory_id,
-                        'description' => $route->description,
-                    ];
+            try {
+                if ($user->route_id) {
+                    $route = Route::with(['areaRef', 'territory'])->find($user->route_id);
+                    if ($route) {
+                        $routeInfo = [
+                            'id' => $route->id,
+                            'name' => $route->name,
+                            'code' => $route->code,
+                            'area' => $route->areaRef ? $route->areaRef->name : null,
+                            'area_id' => $route->area_id,
+                            'territory' => $route->territory ? $route->territory->name : null,
+                            'territory_id' => $route->territory_id,
+                            'description' => $route->description,
+                        ];
+                    }
                 }
+            } catch (\Exception $e) {
+                // Silently fail route info if there's an issue, don't block login
             }
 
             // Return success response
