@@ -1,0 +1,618 @@
+@extends('layouts.admin')
+
+@section('title', 'Edit Customer')
+
+@section('content')
+    <style>
+        .form-label-custom {
+            font-weight: 600;
+            color: #4e3abb;
+            /* Deep Primary */
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        /* Dark Mode Support */
+        html[data-bs-theme="dark"] .form-label-custom {
+            color: #a59cf5;
+            /* Lighter Green for Dark Mode */
+        }
+
+        html[data-bs-theme="dark"] .card-header-custom {
+            background: linear-gradient(45deg, #2a1b7a, #4e3abb);
+        }
+
+        html[data-bs-theme="dark"] .section-title {
+            color: #a59cf5;
+            border-bottom-color: #2c3035;
+        }
+
+        html[data-bs-theme="dark"] .input-group-text {
+            background-color: #2c3035;
+            color: #604ae3;
+            border-color: #495057;
+        }
+
+        html[data-bs-theme="dark"] .form-control,
+        html[data-bs-theme="dark"] .form-select {
+            background-color: #212529;
+            border-color: #495057;
+            color: #fff;
+        }
+
+        html[data-bs-theme="dark"] .form-control:focus,
+        html[data-bs-theme="dark"] .form-select:focus {
+            background-color: #2c3035;
+            border-color: #604ae3;
+            color: #fff;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #604ae3;
+            box-shadow: 0 0 0.25rem rgba(96, 74, 227, 0.25);
+        }
+
+        .card-header-custom {
+            background: linear-gradient(45deg, #4e3abb, #604ae3);
+            color: white;
+        }
+
+        .section-title {
+            color: #604ae3;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .input-group-text {
+            background-color: #f8f9fa;
+            color: #604ae3;
+            border-right: 0;
+        }
+
+        .form-control,
+        .form-select {
+            border-left: 0;
+        }
+
+        /* Fix overlap since we removed border-left */
+        .input-group .form-control:focus,
+        .input-group .form-select:focus {
+            z-index: 3;
+        }
+
+        .input-group-text+.form-control,
+        .input-group-text+.form-select {
+            border-left: 1px solid #ced4da;
+        }
+    </style>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-12">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header card-header-custom py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="card-title mb-0 fw-bold text-white"><i class="ri-edit-2-line me-2"></i>Edit Vendor /
+                            Customer</h4>
+                        <p class="mb-0 text-white-50 fs-13 mt-1">Update details for
+                            {{ $customer->company_name ?? $customer->name }}
+                        </p>
+                    </div>
+                    <a href="{{ route('customers.index') }}" class="btn btn-outline-light btn-sm"><i
+                            class="ri-arrow-left-line me-1"></i> Back to List</a>
+                </div>
+                <div class="card-body p-4">
+                    <form action="{{ route('customers.update', $customer->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="row g-5">
+                            <!-- Left Column: Basic Information -->
+                            <div class="col-lg-6 border-end-lg">
+                                <h5 class="section-title"><i class="ri-building-line me-2"></i>General Details</h5>
+
+                                <!-- Code -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="code" class="form-label-custom">Code <span
+                                                class="text-danger">*</span></label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-barcode-line"></i></span>
+                                            <input type="text" class="form-control bg-light" id="code" name="code"
+                                                value="{{ old('code', $customer->code) }}" placeholder="VEN/00015">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Company Name -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="company_name" class="form-label-custom">Company Name</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-building-4-line"></i></span>
+                                            <input type="text" class="form-control" id="company_name" name="company_name"
+                                                value="{{ old('company_name', $customer->company_name) }}"
+                                                placeholder="Business/Company Name">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Contact Person (Name) -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="name" class="form-label-custom">Contact Person Name <span
+                                                class="text-danger">*</span></label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-user-star-line"></i></span>
+                                            <input type="text" class="form-control" id="name" name="name"
+                                                value="{{ old('name', $customer->name) }}"
+                                                placeholder="Primary Contact Name">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Category -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="category" class="form-label-custom">Category</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-price-tag-3-line"></i></span>
+                                            <select class="form-select" id="category" name="category">
+                                                <option value="">-- Select --</option>
+                                                @foreach(($categories ?? []) as $cat)
+                                                    <option value="{{ $cat->name }}" data-code="{{ $cat->code }}" {{ old('category', $customer->category) == $cat->name ? 'selected' : '' }}>
+                                                        {{ $cat->name }}{{ $cat->code ? ' (' . $cat->code . ')' : '' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Customer Category (Master) -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="customer_category_id" class="form-label-custom">Customer Category (Master)</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-group-line"></i></span>
+                                            <select class="form-select" id="customer_category_id" name="customer_category_id">
+                                                <option value="">No category</option>
+                                                @foreach($customerCategories ?? [] as $cat)
+                                                    <option value="{{ $cat->id }}" {{ old('customer_category_id', $customer->customer_category_id) == $cat->id ? 'selected' : '' }}>
+                                                        {{ $cat->name }}{{ $cat->code ? ' (' . $cat->code . ')' : '' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <small class="text-muted">Change customer category using the master list.</small>
+                                    </div>
+                                </div>
+
+                                <!-- Default Rep -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="rep_id" class="form-label-custom">Default Rep</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-user-star-line"></i></span>
+                                            <select class="form-select" id="rep_id" name="rep_id">
+                                                <option value="">-- Select Rep --</option>
+                                                @foreach($reps ?? [] as $rep)
+                                                    <option value="{{ $rep->id }}" {{ old('rep_id', $customer->rep_id) == $rep->id ? 'selected' : '' }}>
+                                                        {{ $rep->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Distribution Route -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="route_id" class="form-label-custom">Distribution Route</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-route-line"></i></span>
+                                            <select class="form-select" id="route_id" name="route_id">
+                                                <option value="">No route</option>
+                                                @foreach($routes ?? [] as $r)
+                                                    <option value="{{ $r->id }}" {{ old('route_id', $customer->route_id) == $r->id ? 'selected' : '' }}>{{ $r->name }}{{ $r->code ? ' (' . $r->code . ')' : '' }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <small class="text-muted">Assign or remove route. You can also change this from the customer list.</small>
+                                    </div>
+                                </div>
+
+                                <!-- Location -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="location_id" class="form-label-custom">Location</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-map-pin-line"></i></span>
+                                            <select class="form-select" id="location_id" name="location_id">
+                                                <option value="">No location</option>
+                                                @foreach($locations ?? [] as $loc)
+                                                    <option value="{{ $loc->id }}" {{ old('location_id', $customer->location_id) == $loc->id ? 'selected' : '' }}>
+                                                        {{ $loc->name }}{{ $loc->code ? ' (' . $loc->code . ')' : '' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <small class="text-muted">Update the master location for this customer.</small>
+                                    </div>
+                                </div>
+
+                                <!-- Main Office No -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="main_office_no" class="form-label-custom">Main Office No</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-phone-line"></i></span>
+                                            <input type="text" class="form-control" id="main_office_no"
+                                                name="main_office_no"
+                                                value="{{ old('main_office_no', $customer->main_office_no) }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Main Office No 2 -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="main_office_no_2" class="form-label-custom">Main Office No 2</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-phone-line"></i></span>
+                                            <input type="text" class="form-control" id="main_office_no_2"
+                                                name="main_office_no_2"
+                                                value="{{ old('main_office_no_2', $customer->main_office_no_2) }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Mobile No -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="mobile_no" class="form-label-custom">Mobile No</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-smartphone-line"></i></span>
+                                            <input type="text" class="form-control" id="mobile_no" name="mobile_no"
+                                                value="{{ old('mobile_no', $customer->mobile_no) }}"
+                                                placeholder="07XXXXXXXX">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Fax -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="fax" class="form-label-custom">Fax</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-printer-line"></i></span>
+                                            <input type="text" class="form-control" id="fax" name="fax"
+                                                value="{{ old('fax', $customer->fax) }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Main Email -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="email" class="form-label-custom">Main Email <span
+                                                class="text-danger">*</span></label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-mail-line"></i></span>
+                                            <input type="email" class="form-control" id="email" name="email"
+                                                value="{{ old('email', $customer->email) }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- CC Email -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="cc_email" class="form-label-custom">CC Email</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-mail-send-line"></i></span>
+                                            <input type="email" class="form-control" id="cc_email" name="cc_email"
+                                                value="{{ old('cc_email', $customer->cc_email) }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Website -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="website" class="form-label-custom">Website</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-global-line"></i></span>
+                                            <input type="text" class="form-control" id="website" name="website"
+                                                value="{{ old('website', $customer->website) }}" placeholder="http://www.">
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Right Column: Financial & Delivery -->
+                            <div class="col-lg-6">
+                                <h5 class="section-title"><i class="ri-map-pin-line me-2"></i>Address & Billing</h5>
+
+                                <!-- Address -->
+                                <div class="row mb-3">
+                                    <div class="col-sm-4">
+                                        <label for="address" class="form-label-custom pt-1">Address <span
+                                                class="text-danger">*</span></label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <textarea class="form-control" id="address" name="address" rows="2"
+                                            placeholder="Registered Address">{{ old('address', $customer->address) }}</textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Deliver To -->
+                                <div class="row mb-3">
+                                    <div class="col-sm-4">
+                                        <label for="delivery_address" class="form-label-custom pt-1">Deliver to <span
+                                                class="text-danger">*</span></label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <textarea class="form-control" id="delivery_address" name="delivery_address"
+                                            rows="2"
+                                            placeholder="Delivery Address">{{ old('delivery_address', $customer->delivery_address) }}</textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Currency -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="currency" class="form-label-custom">Currency <span
+                                                class="text-danger">*</span></label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i
+                                                    class="ri-money-dollar-circle-line"></i></span>
+                                            <select class="form-select" id="currency" name="currency">
+                                                <option value="LKR" {{ old('currency', $customer->currency) == 'LKR' ? 'selected' : '' }}>LKR</option>
+                                                <option value="USD" {{ old('currency', $customer->currency) == 'USD' ? 'selected' : '' }}>USD</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Account -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="account_payables" class="form-label-custom">Account <span
+                                                class="text-danger">*</span></label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-secure-payment-line"></i></span>
+                                            <select class="form-select" id="account_payables" name="account_payables">
+                                                <option value="">-- Select --</option>
+                                                @foreach(($accounts ?? []) as $acc)
+                                                    @php $val = $acc->code ? ($acc->code.' - '.$acc->name) : $acc->name; @endphp
+                                                    <option value="{{ $val }}" {{ old('account_payables', $customer->account_payables) == $val ? 'selected' : '' }}>
+                                                        {{ $acc->name }}{{ $acc->code ? ' (' . $acc->code . ')' : '' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                <!-- Terms -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="terms" class="form-label-custom">Terms</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-file-list-2-line"></i></span>
+                                            <select class="form-select" id="terms" name="terms">
+                                                <option value="">-- Select --</option>
+                                                @foreach(($terms ?? []) as $t)
+                                                    @php $label = ($t->days == 0) ? 'Cash Only' : ($t->days.' Days Credit'); @endphp
+                                                    <option value="{{ $label }}" data-code="{{ $t->code }}" {{ old('terms', $customer->terms) == $label ? 'selected' : '' }}>
+                                                        {{ $label }}{{ $t->code ? ' (' . $t->code . ')' : '' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- VAT No -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="vat_no" class="form-label-custom">VAT No</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-percent-line"></i></span>
+                                            <input type="text" class="form-control" id="vat_no" name="vat_no"
+                                                value="{{ old('vat_no', $customer->vat_no) }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SVAT No -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="svat_no" class="form-label-custom">SVAT No</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-percent-line"></i></span>
+                                            <input type="text" class="form-control" id="svat_no" name="svat_no"
+                                                value="{{ old('svat_no', $customer->svat_no) }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Credit Limit -->
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="credit_limit" class="form-label-custom">Credit Limit</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text fw-bold">0.00</span>
+                                            <input type="number" step="0.01" class="form-control text-end" id="credit_limit"
+                                                name="credit_limit"
+                                                value="{{ old('credit_limit', $customer->credit_limit) }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Contact 1 -->
+                                <div class="row mb-2 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="contact_person_1" class="form-label-custom">Contact Person 1</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-user-line"></i></span>
+                                            <input type="text" class="form-control" id="contact_person_1"
+                                                name="contact_person_1"
+                                                value="{{ old('contact_person_1', $customer->contact_person_1) }}"
+                                                placeholder="FullName 1">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Contact 2 -->
+                                <div class="row mb-2 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="contact_person_2" class="form-label-custom">Contact 2</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-user-2-line"></i></span>
+                                            <input type="text" class="form-control" id="contact_person_2"
+                                                name="contact_person_2"
+                                                value="{{ old('contact_person_2', $customer->contact_person_2) }}"
+                                                placeholder="FullName 2">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Contact 3 -->
+                                <div class="row mb-2 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="contact_person_3" class="form-label-custom">Contact 3</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-user-3-line"></i></span>
+                                            <input type="text" class="form-control" id="contact_person_3"
+                                                name="contact_person_3"
+                                                value="{{ old('contact_person_3', $customer->contact_person_3) }}"
+                                                placeholder="FullName 3">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Print Name On Cheque -->
+                                <div class="row mb-2 align-items-center">
+                                    <div class="col-sm-4">
+                                        <label for="print_name_on_cheque" class="form-label-custom">Print Name On
+                                            Cheque</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-bank-card-2-line"></i></span>
+                                            <input type="text" class="form-control" id="print_name_on_cheque"
+                                                name="print_name_on_cheque"
+                                                value="{{ old('print_name_on_cheque', $customer->print_name_on_cheque) }}"
+                                                placeholder="Print Name">
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="row mt-5">
+                            <div class="col-12">
+                                <h5 class="section-title"><i class="ri-bank-card-line me-2"></i>Bank Info</h5>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="bank_name" class="form-label fw-bold text-muted small text-uppercase">Bank
+                                    Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text text-muted"><i class="ri-bank-line"></i></span>
+                                    <input type="text" class="form-control" id="bank_name" name="bank_name"
+                                        placeholder="ABC Bank" value="{{ old('bank_name', $customer->bank_name) }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="bank_branch"
+                                    class="form-label fw-bold text-muted small text-uppercase">Branch</label>
+                                <div class="input-group">
+                                    <span class="input-group-text text-muted"><i class="ri-git-branch-line"></i></span>
+                                    <input type="text" class="form-control" id="bank_branch" name="bank_branch"
+                                        placeholder="Colombo Branch"
+                                        value="{{ old('bank_branch', $customer->bank_branch) }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="bank_account_number"
+                                    class="form-label fw-bold text-muted small text-uppercase">Account Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text text-muted"><i class="ri-hashtag"></i></span>
+                                    <input type="text" class="form-control" id="bank_account_number"
+                                        name="bank_account_number" placeholder="000-000-0000"
+                                        value="{{ old('bank_account_number', $customer->bank_account_number) }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-end mt-4 pt-3 border-top">
+                            <button type="reset" class="btn btn-light px-4 me-2">Reset</button>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold"><i class="ri-save-line me-1"></i>
+                                Update Customer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
