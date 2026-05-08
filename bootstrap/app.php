@@ -1,5 +1,9 @@
 <?php
 
+if (!function_exists('mb_split') && file_exists(__DIR__ . '/../vendor/symfony/polyfill-mbstring/bootstrap.php')) {
+    require_once __DIR__ . '/../vendor/symfony/polyfill-mbstring/bootstrap.php';
+}
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
