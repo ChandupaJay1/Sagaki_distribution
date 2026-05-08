@@ -9,6 +9,8 @@ use App\Models\Customer;
 use App\Models\Location;
 use App\Models\Invoice;
 use App\Models\Grn;
+use App\Models\Account;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -46,6 +48,8 @@ class PayBillController extends Controller
         $vendors = Vendor::orderBy('company_name')->get();
         $customers = Customer::orderBy('company_name')->get();
         $locations = Location::where('is_active', 1)->orderBy('name')->get();
+        $accounts = Account::where('is_active', 1)->orderBy('name')->get();
+        $reps = User::where('role', 'ref')->where('is_active', 1)->orderBy('name')->get();
         
         // Generate next Voucher Number
         $lastPayment = PayBill::where('type', $type)->orderBy('id', 'desc')->first();
@@ -64,7 +68,7 @@ class PayBillController extends Controller
             $nextVoucherNo = $prefix . str_pad($lastNo + 1, 5, '0', STR_PAD_LEFT);
         }
 
-        return view('pay_bills.create', compact('vendors', 'customers', 'locations', 'nextVoucherNo', 'type'));
+        return view('pay_bills.create', compact('vendors', 'customers', 'locations', 'accounts', 'reps', 'nextVoucherNo', 'type'));
     }
 
     public function store(Request $request)
